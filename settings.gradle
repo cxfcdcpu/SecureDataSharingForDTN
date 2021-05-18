@@ -1,0 +1,2 @@
+rootProject.name = "SecureDataSharingForDTN"
+include ':app'
