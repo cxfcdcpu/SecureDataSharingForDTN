@@ -1,3 +1,10 @@
 <resources>
-    <string name="app_name">SecureDataSharingForDTN</string>
+    <string name="app_name">Secure Data Sharing For DTN</string>
+    <string name="app_title">Secure Data Sharing For Battlefield DTN</string>
+    <string name="button_login">LOGIN</string>
+    <string name="button_register">REGISTER</string>
+    <string name="label_login_username">Username</string>
+    <string name="hint_login_username">Please enter your username</string>
+    <string name="label_login_password">Password</string>
+    <string name="label_login_setup" >Login/Setup</string>
 </resources>
