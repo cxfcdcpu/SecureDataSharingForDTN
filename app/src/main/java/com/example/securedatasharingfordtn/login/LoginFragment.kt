@@ -7,7 +7,12 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.securedatasharingfordtn.R
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import com.example.securedatasharingfordtn.database.DTNDataSharingDatabase
+import com.example.securedatasharingfordtn.database.LoginUserData
 import com.example.securedatasharingfordtn.databinding.FragmentLoginBinding
+import com.google.android.material.snackbar.Snackbar
 
 class LoginFragment : Fragment()  {
     override fun onCreateView(
@@ -15,9 +20,35 @@ class LoginFragment : Fragment()  {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        //data binding and view model reference obj
         val binding: FragmentLoginBinding = DataBindingUtil.inflate(
             inflater, R.layout.fragment_login,container,false
         )
+        val application = requireNotNull(this.activity).application
+
+        val dataSource = DTNDataSharingDatabase.getInstance(application).dataSharingDatabaseDao
+
+        val viewModelFactory = LoginViewModelFactory(dataSource, application)
+
+        val loginViewModel = ViewModelProvider(
+            this,viewModelFactory).get(LoginViewModel::class.java)
+
+        binding.loginForm.loginViewModel = loginViewModel
+
+        binding.lifecycleOwner = this
+
+        loginViewModel.loginFailSnackbarEvent.observe(viewLifecycleOwner, Observer {
+            if (it == true) { // Observed state is true.
+                Snackbar.make(
+                    requireActivity().findViewById(android.R.id.content),
+                    getString(R.string.snackbar_test_text),
+                    Snackbar.LENGTH_SHORT // How long to display the message.
+                ).show()
+                // Reset state to make sure the snackbar is only shown once, even if the device
+                // has a configuration change.
+                loginViewModel.doneShowingLoginSnackbar()
+            }
+        })
 
 
         return binding.root

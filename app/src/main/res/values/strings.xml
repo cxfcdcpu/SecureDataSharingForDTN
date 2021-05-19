@@ -7,4 +7,5 @@
     <string name="hint_login_username">Please enter your username</string>
     <string name="label_login_password">Password</string>
     <string name="label_login_setup" >Login/Setup</string>
+    <string name="snackbar_test_text">data binding test OK</string>
 </resources>

@@ -32,10 +32,16 @@ class LoginViewModel(
     }
 
 
+
     //all overloaded functions.
     //overload onclear to cancel database jobs
     override fun onCleared() {
         super.onCleared()
         viewModelJob.cancel()
+    }
+
+    //testing functions
+    fun onTestSnackbar(){
+        _loginFailSnackbarEvent.value = true
     }
 }

@@ -3,21 +3,16 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".login.LoginFragment"
+
     >
-    <data>
-        <variable
-            name="loginViewModel"
-            type="com.example.securedatasharingfordtn.login.LoginViewModel"/>
-    </data>
+
+
 
 <androidx.coordinatorlayout.widget.CoordinatorLayout
-
-
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-
+    android:layout_height="match_parent"
+    tools:context=".login.LoginFragment"
+    >
 
 
     <com.google.android.material.appbar.AppBarLayout
@@ -66,7 +61,8 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <include layout="@layout/login_main"></include>
+        <include layout="@layout/login_main"
+            android:id="@+id/login_form"/>
 
     </androidx.core.widget.NestedScrollView>
 
