@@ -27,10 +27,10 @@ data class LoginUserData(
     var userPrivateKey: String="",
 
     @ColumnInfo(name = "recent_login_time")
-    val recentLoginTimeMilli: Long = System.currentTimeMillis(),
+    var recentLoginTimeMilli: Long = System.currentTimeMillis(),
 
     @ColumnInfo(name = "user_register_time")
-    val userRegisterTimeMilli: Long = 0L,
+    val userRegisterTimeMilli: Long = System.currentTimeMillis(),
 
     @ColumnInfo(name = "user_expiration_time")
     val userExpirationTimeMilli: Long = 0L,
