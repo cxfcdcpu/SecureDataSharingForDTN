@@ -9,6 +9,7 @@ import com.example.securedatasharingfordtn.R
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.example.securedatasharingfordtn.database.DTNDataSharingDatabase
 import com.example.securedatasharingfordtn.database.LoginUserData
 import com.example.securedatasharingfordtn.databinding.FragmentLoginBinding
@@ -44,6 +45,16 @@ class LoginFragment : Fragment()  {
                     getString(R.string.snackbar_test_text),
                     Snackbar.LENGTH_SHORT // How long to display the message.
                 ).show()
+                // Reset state to make sure the snackbar is only shown once, even if the device
+                // has a configuration change.
+                loginViewModel.doneShowingLoginSnackbar()
+            }
+        })
+
+        loginViewModel.registerFailSnackbarEvent.observe(viewLifecycleOwner, Observer {
+            if (it == true) { // Observed state is true.
+                this.findNavController().navigate(
+                    LoginFragmentDirections.actionLoginFragmentToMainFragment())
                 // Reset state to make sure the snackbar is only shown once, even if the device
                 // has a configuration change.
                 loginViewModel.doneShowingLoginSnackbar()

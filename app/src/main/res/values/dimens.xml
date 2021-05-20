@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="app_title_translation_y">40dp</dimen>
+    <dimen name="main_imageview_width">200</dimen>
 </resources>

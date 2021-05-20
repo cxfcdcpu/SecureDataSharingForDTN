@@ -25,13 +25,21 @@ class LoginViewModel(
     val loginFailSnackbarEvent: LiveData<Boolean>
         get() = _loginFailSnackbarEvent
 
-
-    //snackbar indicator functions
+    //login error snackbar indicator functions
     fun doneShowingLoginSnackbar(){
         _loginFailSnackbarEvent.value = false
     }
 
 
+    //register error snackbar indicator
+    private var _registerFailSnackbarEvent = MutableLiveData<Boolean>()
+    val registerFailSnackbarEvent: LiveData<Boolean>
+        get() = _registerFailSnackbarEvent
+    //try to login
+    //login error snackbar indicator functions
+    fun doneShowingRegisterSnackbar(){
+        _registerFailSnackbarEvent.value = false
+    }
 
     //all overloaded functions.
     //overload onclear to cancel database jobs
@@ -43,5 +51,8 @@ class LoginViewModel(
     //testing functions
     fun onTestSnackbar(){
         _loginFailSnackbarEvent.value = true
+    }
+    fun onTestRedirect(){
+        _registerFailSnackbarEvent.value = true
     }
 }
