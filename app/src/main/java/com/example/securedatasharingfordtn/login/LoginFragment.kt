@@ -42,7 +42,7 @@ class LoginFragment : Fragment()  {
             if (it == true) { // Observed state is true.
                 Snackbar.make(
                     requireActivity().findViewById(android.R.id.content),
-                    getString(R.string.snackbar_test_text),
+                    getString(R.string.snackbar_test_text)+loginViewModel.lastLoginTime.value.toString(),
                     Snackbar.LENGTH_SHORT // How long to display the message.
                 ).show()
                 // Reset state to make sure the snackbar is only shown once, even if the device

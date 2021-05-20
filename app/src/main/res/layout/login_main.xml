@@ -23,8 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/button_login"
-        android:onClick="@{() -> loginViewModel.tryLogin(
-        editTextTextPersonName.text,editTextTextPassword.text)}"
+        android:onClick="@{() -> loginViewModel.tryLoginEvent()}"
         app:layout_constraintEnd_toStartOf="@+id/button2"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -60,7 +59,7 @@
         android:id="@+id/editTextTextPersonName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-
+        android:text="@={loginViewModel.username}"
         android:layout_marginEnd="16dp"
         android:ems="10"
         android:hint="@string/hint_login_username"
@@ -91,6 +90,7 @@
         android:layout_marginEnd="16dp"
         android:ems="10"
         android:inputType="textPassword"
+        android:text="@={loginViewModel.password}"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/textView3"

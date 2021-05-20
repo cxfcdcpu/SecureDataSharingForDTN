@@ -33,7 +33,7 @@ data class LoginUserData(
     val userRegisterTimeMilli: Long = System.currentTimeMillis(),
 
     @ColumnInfo(name = "user_expiration_time")
-    val userExpirationTimeMilli: Long = 0L,
+    var userExpirationTimeMilli: Long = 0L,
 
     @ColumnInfo(name = "is_revoked")
     var isRevoked: Boolean=false

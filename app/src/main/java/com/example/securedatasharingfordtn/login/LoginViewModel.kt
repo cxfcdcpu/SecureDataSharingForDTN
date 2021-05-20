@@ -1,14 +1,15 @@
 package com.example.securedatasharingfordtn.login
 
 import android.app.Application
+import android.util.Log
+import androidx.databinding.ObservableField
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import com.example.securedatasharingfordtn.database.DTNDataSharingDatabaseDao
 import com.example.securedatasharingfordtn.database.LoginUserData
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 
 class LoginViewModel(
     val database: DTNDataSharingDatabaseDao,
@@ -26,6 +27,20 @@ class LoginViewModel(
     private var _loginFailSnackbarEvent = MutableLiveData<Boolean>()
     val loginFailSnackbarEvent: LiveData<Boolean>
         get() = _loginFailSnackbarEvent
+
+    //properties
+    val username = MutableLiveData<String>()
+    val password = MutableLiveData<String>()
+    val lastLoginTime = MutableLiveData<Long>()
+
+
+    //initial value for all properties
+    init {
+        username.value=""
+        password.value=""
+        lastLoginTime.value = 0L
+    }
+
 
     //login error snackbar indicator functions
     fun doneShowingLoginSnackbar(){
@@ -48,21 +63,53 @@ class LoginViewModel(
 
 
     //database query functions
-    fun tryLogin(username: String, password: String) {
-        var tryUser = database.tryLogin(username,password)
-        if(tryUser?.userExpirationTimeMilli > System.currentTimeMillis()){
-            tryUser.recentLoginTimeMilli = System.currentTimeMillis()
-            database.update(tryUser)
-            _validUser.value=tryUser
+    fun tryLoginEvent() {
+
+        Log.i("Login", "before Login:" + username.value+ " " +password.value)
+
+        uiScope.launch {
+            val tryUser = tryLogin() //database.tryLogin(username.value!!,password.value!!)
+            if(tryUser!=null && tryUser.userExpirationTimeMilli > System.currentTimeMillis()){
+                tryUser.recentLoginTimeMilli = System.currentTimeMillis()
+                update(tryUser)
+                _validUser.value=tryUser
+                onTestRedirect()
+            }
+            else{
+                val newData = LoginUserData()
+                newData.userName = username.value!!
+                newData.userPassword = password.value!!
+                newData.userExpirationTimeMilli = 2* System.currentTimeMillis()
+                Log.i("Login", "after Login:" +newData.userName+ " " +newData.userPassword)
+                insert(newData)
+                onTestSnackbar()
+            }
+//            val newData = LoginUserData()
+//            insert(newData)
+//            lastLoginTime.value = newData.recentLoginTimeMilli
+
         }
-        onTestSnackbar()
+
     }
 
+    private suspend fun tryLogin(): LoginUserData?{
+        return withContext(Dispatchers.IO){
+            val tryUser = database.tryLogin(username.value!!,password.value!!)
+            tryUser
+        }
+    }
 
+    private suspend fun insert(data: LoginUserData) {
+        withContext(Dispatchers.IO) {
+            database.insert(data)
+        }
+    }
 
-
-
-
+    private suspend fun update(data: LoginUserData) {
+        withContext(Dispatchers.IO) {
+            database.update(data)
+        }
+    }
 
 
     //all overloaded functions.
