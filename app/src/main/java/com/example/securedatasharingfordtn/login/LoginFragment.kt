@@ -4,14 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import com.example.securedatasharingfordtn.R
+import android.view.Window
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.example.securedatasharingfordtn.R
 import com.example.securedatasharingfordtn.database.DTNDataSharingDatabase
-import com.example.securedatasharingfordtn.database.LoginUserData
 import com.example.securedatasharingfordtn.databinding.FragmentLoginBinding
 import com.google.android.material.snackbar.Snackbar
 
@@ -21,6 +21,7 @@ class LoginFragment : Fragment()  {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
         //data binding and view model reference obj
         val binding: FragmentLoginBinding = DataBindingUtil.inflate(
             inflater, R.layout.fragment_login,container,false

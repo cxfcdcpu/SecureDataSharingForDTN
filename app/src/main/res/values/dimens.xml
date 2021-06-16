@@ -2,4 +2,6 @@
 <resources>
     <dimen name="app_title_translation_y">40dp</dimen>
     <dimen name="main_imageview_width">200</dimen>
+
+    <dimen name="margin_25">40dp</dimen>
 </resources>
