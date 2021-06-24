@@ -23,35 +23,31 @@ class LoginViewModel(
     private var _validUser = MutableLiveData<LoginUserData?>()
     val validUser: LiveData<LoginUserData?>
         get() = _validUser
-    //login error snackbar indicator
-    private var _loginFailSnackbarEvent = MutableLiveData<Boolean>()
-    val loginFailSnackbarEvent: LiveData<Boolean>
-        get() = _loginFailSnackbarEvent
-
-    //login error snackbar indicator
-    var loginSetupTab :Boolean = true
 
 
     //properties
     val username = MutableLiveData<String>()
     val password = MutableLiveData<String>()
+    val missionCode = MutableLiveData<String>()
     val lastLoginTime = MutableLiveData<Long>()
-
+    var tabSelect = MutableLiveData<Boolean>()
 
     //initial value for all properties
     init {
         username.value=""
         password.value=""
+        missionCode.value=""
         lastLoginTime.value = 0L
     }
 
-
+    //login error snackbar indicator
+    private var _loginFailSnackbarEvent = MutableLiveData<Boolean>()
+    val loginFailSnackbarEvent: LiveData<Boolean>
+        get() = _loginFailSnackbarEvent
     //login error snackbar indicator functions
     fun doneShowingLoginSnackbar(){
         _loginFailSnackbarEvent.value = false
     }
-
-
     //register error snackbar indicator
     private var _registerFailSnackbarEvent = MutableLiveData<Boolean>()
     val registerFailSnackbarEvent: LiveData<Boolean>

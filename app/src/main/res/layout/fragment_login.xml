@@ -162,6 +162,7 @@
                 android:ems="10"
                 android:inputType="numberPassword"
                 android:visibility="invisible"
+                android:text="@={loginViewModel.missionCode}"
                 app:layout_constraintEnd_toStartOf="@+id/imageButton"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/textView4"
@@ -201,6 +202,7 @@
                 android:layout_marginTop="32dp"
 
                 android:clickable="@{((loginViewModel.password==&quot;&quot;)||(loginViewModel.username==&quot;&quot;))?false:true}"
+                android:backgroundTint="@{((loginViewModel.password==&quot;&quot;)||(loginViewModel.username==&quot;&quot;))?@color/gray:@color/purple_700}"
                 android:onClick="@{() -> loginViewModel.tryLoginEvent()}"
                 android:text="@string/button_login"
                 android:visibility="visible"
@@ -215,6 +217,8 @@
                 android:layout_marginTop="32dp"
                 android:text="@string/button_setup"
                 android:visibility="invisible"
+                android:clickable="@{((loginViewModel.password==&quot;&quot;)||(loginViewModel.username==&quot;&quot;)||(loginViewModel.missionCode==&quot;&quot;))?false:true}"
+                android:backgroundTint="@{((loginViewModel.password==&quot;&quot;)||(loginViewModel.username==&quot;&quot;)||(loginViewModel.missionCode==&quot;&quot;))?@color/gray:@color/purple_700}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/editTextNumberPassword" />
