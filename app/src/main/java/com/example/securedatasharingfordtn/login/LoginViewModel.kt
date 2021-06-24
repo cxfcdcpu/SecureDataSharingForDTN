@@ -28,6 +28,10 @@ class LoginViewModel(
     val loginFailSnackbarEvent: LiveData<Boolean>
         get() = _loginFailSnackbarEvent
 
+    //login error snackbar indicator
+    var loginSetupTab :Boolean = true
+
+
     //properties
     val username = MutableLiveData<String>()
     val password = MutableLiveData<String>()
@@ -99,6 +103,8 @@ class LoginViewModel(
         }
     }
 
+
+
     private suspend fun insert(data: LoginUserData) {
         withContext(Dispatchers.IO) {
             database.insert(data)
@@ -126,4 +132,8 @@ class LoginViewModel(
     fun onTestRedirect(){
         _registerFailSnackbarEvent.value = true
     }
+
+
+
+
 }

@@ -14,6 +14,7 @@ import com.example.securedatasharingfordtn.R
 import com.example.securedatasharingfordtn.database.DTNDataSharingDatabase
 import com.example.securedatasharingfordtn.databinding.FragmentLoginBinding
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.tabs.TabLayout
 
 class LoginFragment : Fragment()  {
     override fun onCreateView(
@@ -35,9 +36,39 @@ class LoginFragment : Fragment()  {
         val loginViewModel = ViewModelProvider(
             this,viewModelFactory).get(LoginViewModel::class.java)
 
-        binding.loginForm.loginViewModel = loginViewModel
+        binding.loginViewModel = loginViewModel
 
         binding.lifecycleOwner = this
+
+        binding.loginSetupTab.addOnTabSelectedListener(object :
+            TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab) {
+                if(binding.loginSetupTab.selectedTabPosition==0){
+                    binding.button.visibility=View.VISIBLE
+                    binding.button2.visibility=View.INVISIBLE
+                    binding.textView4.visibility=View.INVISIBLE
+                    binding.editTextNumberPassword.visibility=View.INVISIBLE
+                    binding.imageButton.visibility = View.INVISIBLE
+                }
+                else{
+                    binding.button.visibility=View.INVISIBLE
+                    binding.button2.visibility=View.VISIBLE
+                    binding.textView4.visibility=View.VISIBLE
+                    binding.editTextNumberPassword.visibility=View.VISIBLE
+                    binding.imageButton.visibility=View.VISIBLE
+                }
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab) {
+
+            }
+
+            override fun onTabReselected(tab: TabLayout.Tab) {
+
+            }
+
+        })
+
 
         loginViewModel.loginFailSnackbarEvent.observe(viewLifecycleOwner, Observer {
             if (it == true) { // Observed state is true.
