@@ -153,6 +153,17 @@
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/textView3"
                 app:layout_constraintTop_toTopOf="@+id/textView3" />
+            <ImageButton
+                android:id="@+id/imageButton2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:src="@android:drawable/ic_menu_view"
+                android:onClick="@{() -> loginViewModel.onViewPassword()}"
+                app:layout_constraintBottom_toBottomOf="@+id/editTextTextPassword"
+                app:layout_constraintEnd_toEndOf="@+id/editTextTextPassword"
+                app:layout_constraintTop_toTopOf="@+id/editTextTextPassword" />
+
 
             <EditText
                 android:id="@+id/editTextNumberPassword"
@@ -161,8 +172,8 @@
                 android:layout_marginTop="32dp"
                 android:ems="10"
                 android:inputType="numberPassword"
-                android:visibility="invisible"
                 android:text="@={loginViewModel.missionCode}"
+                android:visibility="invisible"
                 app:layout_constraintEnd_toStartOf="@+id/imageButton"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/textView4"
@@ -188,6 +199,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
+                android:onClick="@{() -> loginViewModel.onUsingCamera()}"
                 android:src="@android:drawable/ic_menu_camera"
                 android:visibility="invisible"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -201,8 +213,8 @@
 
                 android:layout_marginTop="32dp"
 
-                android:clickable="@{((loginViewModel.password==&quot;&quot;)||(loginViewModel.username==&quot;&quot;))?false:true}"
                 android:backgroundTint="@{((loginViewModel.password==&quot;&quot;)||(loginViewModel.username==&quot;&quot;))?@color/gray:@color/purple_700}"
+                android:clickable="@{((loginViewModel.password==&quot;&quot;)||(loginViewModel.username==&quot;&quot;))?false:true}"
                 android:onClick="@{() -> loginViewModel.tryLoginEvent()}"
                 android:text="@string/button_login"
                 android:visibility="visible"
@@ -215,15 +227,60 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
+                android:backgroundTint="@{((loginViewModel.password==&quot;&quot;)||(loginViewModel.username==&quot;&quot;)||(loginViewModel.missionCode==&quot;&quot;))?@color/gray:@color/purple_700}"
+                android:clickable="@{((loginViewModel.password==&quot;&quot;)||(loginViewModel.username==&quot;&quot;)||(loginViewModel.missionCode==&quot;&quot;))?false:true}"
                 android:text="@string/button_setup"
                 android:visibility="invisible"
-                android:clickable="@{((loginViewModel.password==&quot;&quot;)||(loginViewModel.username==&quot;&quot;)||(loginViewModel.missionCode==&quot;&quot;))?false:true}"
-                android:backgroundTint="@{((loginViewModel.password==&quot;&quot;)||(loginViewModel.username==&quot;&quot;)||(loginViewModel.missionCode==&quot;&quot;))?@color/gray:@color/purple_700}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/editTextNumberPassword" />
 
 
+            <com.budiyev.android.codescanner.CodeScannerView
+                android:id="@+id/viewFinder"
+                android:layout_width="0dip"
+                android:layout_height="0dip"
+                android:layout_gravity="center"
+                android:layout_marginStart="8dp"
+
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                app:autoFocusButtonColor="@android:color/white"
+                app:autoFocusButtonVisible="true"
+                app:flashButtonColor="@android:color/white"
+                app:flashButtonVisible="true"
+                app:frameAspectRatioHeight="1"
+                app:frameAspectRatioWidth="1"
+                app:frameColor="@android:color/white"
+                app:frameCornersRadius="0dp"
+                app:frameCornersSize="50dp"
+                app:frameSize="0.75"
+                app:frameThickness="2dp"
+                app:layout_constraintBottom_toTopOf="@+id/button2"
+                app:layout_constraintEnd_toStartOf="@+id/imageButton"
+                app:layout_constraintStart_toStartOf="@+id/editTextNumberPassword"
+                app:layout_constraintTop_toBottomOf="@+id/editTextTextPassword"
+                app:maskColor="#77000000"
+                tools:ignore="MissingClass" />
+
+
+
+
+            <!--            <androidx.camera.view.PreviewView-->
+            <!--                android:id="@+id/viewFinder"-->
+            <!--                android:layout_width="0dip"-->
+            <!--                android:layout_height="0dip"-->
+            <!--                android:layout_gravity="center"-->
+            <!--                android:layout_marginStart="8dp"-->
+
+            <!--                android:layout_marginEnd="8dp"-->
+            <!--                android:layout_weight="1"-->
+            <!--                android:visibility="invisible"-->
+            <!--                app:layout_constraintBottom_toTopOf="@+id/button2"-->
+            <!--                app:layout_constraintEnd_toStartOf="@+id/imageButton"-->
+            <!--                app:layout_constraintStart_toStartOf="@+id/editTextNumberPassword"-->
+            <!--                app:layout_constraintTop_toBottomOf="@+id/editTextTextPassword" />-->
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

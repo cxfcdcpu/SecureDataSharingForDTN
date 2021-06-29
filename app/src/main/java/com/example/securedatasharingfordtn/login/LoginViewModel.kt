@@ -32,13 +32,7 @@ class LoginViewModel(
     val lastLoginTime = MutableLiveData<Long>()
     var tabSelect = MutableLiveData<Boolean>()
 
-    //initial value for all properties
-    init {
-        username.value=""
-        password.value=""
-        missionCode.value=""
-        lastLoginTime.value = 0L
-    }
+
 
     //login error snackbar indicator
     private var _loginFailSnackbarEvent = MutableLiveData<Boolean>()
@@ -57,10 +51,24 @@ class LoginViewModel(
     fun doneShowingRegisterSnackbar(){
         _registerFailSnackbarEvent.value = false
     }
+    //Camera event
+    private var _useCameraEvent = MutableLiveData<Boolean>()
+    val useCameraEvent : LiveData<Boolean>
+        get() = _useCameraEvent
+    //view password event
+    private var _viewPasswordEvent = MutableLiveData<Boolean>()
+    val viewPasswordEvent : LiveData<Boolean>
+        get() = _viewPasswordEvent
 
-
-
-
+    //initial value for all properties
+    init {
+        username.value=""
+        password.value=""
+        missionCode.value=""
+        lastLoginTime.value = 0L
+        _useCameraEvent.value = false
+        _viewPasswordEvent.value = false
+    }
 
     //database query functions
     fun tryLoginEvent() {
@@ -128,7 +136,12 @@ class LoginViewModel(
     fun onTestRedirect(){
         _registerFailSnackbarEvent.value = true
     }
-
+    fun onUsingCamera(){
+        _useCameraEvent.value = _useCameraEvent.value != true
+    }
+    fun onViewPassword(){
+        _viewPasswordEvent.value = _viewPasswordEvent.value != true
+    }
 
 
 
