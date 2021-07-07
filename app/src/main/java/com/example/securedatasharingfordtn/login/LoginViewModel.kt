@@ -9,11 +9,33 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.example.securedatasharingfordtn.database.DTNDataSharingDatabaseDao
 import com.example.securedatasharingfordtn.database.LoginUserData
+import com.example.securedatasharingfordtn.revoabe.PrivateKey
+import com.example.securedatasharingfordtn.revoabe.PublicKey
+import com.example.securedatasharingfordtn.revoabe.ReVo_ABE
+import com.example.securedatasharingfordtn.tree_type.MembershipTree
+import io.ktor.client.*
+import io.ktor.client.engine.android.*
 import kotlinx.coroutines.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import java.net.InetSocketAddress
 
 class LoginViewModel(
     val database: DTNDataSharingDatabaseDao,
     application: Application): AndroidViewModel(application) {
+
+    private lateinit var curABE: ReVo_ABE
+    private lateinit var curPublicKey: PublicKey
+    private lateinit var curPrivateKey: PrivateKey
+    private lateinit var curTree: MembershipTree
+
+    val client = HttpClient(Android) {
+        engine {
+            connectTimeout = 100_000
+            socketTimeout = 100_000
+        }
+    }
 
     //asyncronized job for database
     private var viewModelJob = Job()
@@ -51,6 +73,23 @@ class LoginViewModel(
     fun doneShowingRegisterSnackbar(){
         _registerFailSnackbarEvent.value = false
     }
+
+    //register error snackbar indicator
+    private var _setupOKEvent = MutableLiveData<Boolean>()
+    val setupOKEvent: LiveData<Boolean>
+        get() = _setupOKEvent
+    //try to login
+    //login error snackbar indicator functions
+    fun doneSetupOKSnackbar(){
+        _setupOKEvent.value = false
+    }
+
+
+    //when user click setup button
+    private var _onSetupEvent = MutableLiveData<Boolean>()
+    val onSetupEvent: LiveData<Boolean>
+        get() = _onSetupEvent
+
     //Camera event
     private var _useCameraEvent = MutableLiveData<Boolean>()
     val useCameraEvent : LiveData<Boolean>
@@ -99,6 +138,23 @@ class LoginViewModel(
         }
 
     }
+    //Try to setup mission at backend.
+    fun trySetupEvent(){
+
+        uiScope.
+        launch {
+            val response: HttpResponse = client.post("http://131.151.90.204:8080/ReVo_webtest/Bootstrap"){
+                body = "{\"username\": \"${username.value}\",\"password\": \"${password.value}\",\"missionCode\":\"${missionCode.value}\"}"
+            }
+            if(response.status.value==200){
+                _setupOKEvent.value=true
+            }else{
+                _registerFailSnackbarEvent.value=true
+            }
+        }
+
+
+    }
 
     private suspend fun tryLogin(): LoginUserData?{
         return withContext(Dispatchers.IO){
@@ -106,6 +162,9 @@ class LoginViewModel(
             tryUser
         }
     }
+
+
+
 
 
 
@@ -142,6 +201,8 @@ class LoginViewModel(
     fun onViewPassword(){
         _viewPasswordEvent.value = _viewPasswordEvent.value != true
     }
+
+
 
 
 

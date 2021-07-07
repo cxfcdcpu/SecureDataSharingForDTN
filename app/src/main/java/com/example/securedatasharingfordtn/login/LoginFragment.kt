@@ -84,8 +84,10 @@ class LoginFragment : Fragment()  {
         observeTabSelection(binding,loginViewModel)
         //show snackbar after login fail
         observeLoginFailEvent(loginViewModel)
-        //show snackbar after setup fail
+
+        //show snackbar after setup
         observeRegisterFailEvent(loginViewModel)
+        observeSetupOKEvent(loginViewModel)
         //use camera when camera clicked
         observeCameraEvent(loginViewModel)
         //view password
@@ -158,14 +160,35 @@ class LoginFragment : Fragment()  {
     fun observeRegisterFailEvent(loginViewModel: LoginViewModel){
         loginViewModel.registerFailSnackbarEvent.observe(viewLifecycleOwner, Observer {
             if (it == true) { // Observed state is true.
-                this.findNavController().navigate(
-                    LoginFragmentDirections.actionLoginFragmentToMainFragment())
+                Snackbar.make(
+                    requireActivity().findViewById(android.R.id.content),
+                    "Setup user account fail.",
+                    Snackbar.LENGTH_SHORT // How long to display the message.
+                ).show()
                 // Reset state to make sure the snackbar is only shown once, even if the device
                 // has a configuration change.
                 loginViewModel.doneShowingRegisterSnackbar()
             }
         })
     }
+
+    fun observeSetupOKEvent(loginViewModel: LoginViewModel){
+        loginViewModel.setupOKEvent.observe(viewLifecycleOwner, Observer {
+            if (it == true) { // Observed state is true.
+                Snackbar.make(
+                    requireActivity().findViewById(android.R.id.content),
+                    "Setup user account Successfully.",
+                    Snackbar.LENGTH_SHORT // How long to display the message.
+                ).show()
+                // Reset state to make sure the snackbar is only shown once, even if the device
+                // has a configuration change.
+                loginViewModel.doneSetupOKSnackbar()
+            }
+        })
+    }
+
+
+
 
     fun observeCameraEvent(loginViewModel: LoginViewModel){
         //also give bind the viewFinder with click ability

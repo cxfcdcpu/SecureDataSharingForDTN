@@ -10,6 +10,7 @@ buildscript {
         version_lifecycle = "2.3.1"
         version_navigation = '1.0.0'
         version_room = "2.3.0"
+        ktor_version ="1.6.1"
     }
 
     repositories {
@@ -20,7 +21,7 @@ buildscript {
     dependencies {
 
 
-        classpath 'com.android.tools.build:gradle:4.2.1'
+        classpath 'com.android.tools.build:gradle:4.2.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.0"
         classpath "android.arch.navigation:navigation-safe-args-gradle-plugin:$version_navigation"
 
