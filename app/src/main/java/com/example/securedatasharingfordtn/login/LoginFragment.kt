@@ -4,9 +4,9 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.text.InputType
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,18 +21,16 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.navigation.fragment.findNavController
-import com.budiyev.android.codescanner.AutoFocusMode
-import com.budiyev.android.codescanner.CodeScanner
-import com.budiyev.android.codescanner.DecodeCallback
-import com.budiyev.android.codescanner.ErrorCallback
-import com.budiyev.android.codescanner.ScanMode
+import com.budiyev.android.codescanner.*
 import com.example.securedatasharingfordtn.R
 import com.example.securedatasharingfordtn.database.DTNDataSharingDatabase
 import com.example.securedatasharingfordtn.databinding.FragmentLoginBinding
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
+import it.unisa.dia.gas.jpbc.Pairing
+import it.unisa.dia.gas.plaf.jpbc.pairing.PairingFactory
 import java.io.File
+import java.io.InputStream
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -114,6 +112,19 @@ class LoginFragment : Fragment()  {
             }
 
         })
+    }
+
+    fun hardcodedCurveFileDir(): String? {
+        if ("a.properties" !in context!!.fileList()){
+            val am = context!!.assets
+            val filename = "a.properties"
+            val inputStream: InputStream = am.open(filename)
+
+            requireContext().openFileOutput(filename, Context.MODE_PRIVATE).use {
+                it.write(inputStream.readBytes())
+            }
+        }
+        return context!!.filesDir.absolutePath+"/a.properties"
     }
 
     fun observeTabSelection(binding: FragmentLoginBinding,loginViewModel: LoginViewModel){

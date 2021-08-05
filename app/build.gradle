@@ -59,6 +59,8 @@ dependencies {
     implementation files('libs/jpbc-api-2.0.0.jar')
     implementation files('libs/jpbc-api-2.0.0.jar')
     implementation files('libs/jpbc-plaf-2.0.0.jar')
+    implementation files('libs/antlr-4.9.2-complete.jar')
+    implementation files('libs/java-json.jar')
 
     kapt "androidx.room:room-compiler:$version_room"
     implementation "androidx.lifecycle:lifecycle-extensions:$version_lifecycle_extensions"

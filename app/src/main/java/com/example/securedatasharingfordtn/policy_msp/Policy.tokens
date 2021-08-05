@@ -1,0 +1,12 @@
+T__0=1
+OperatorOR=2
+OperatorAND=3
+WHITESPACE=4
+LPAR=5
+RPAR=6
+BinOperator=7
+NUM=8
+WORD=9
+'!'=1
+'('=5
+')'=6

@@ -1,14 +1,14 @@
 package com.example.securedatasharingfordtn.mainbody
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import com.example.securedatasharingfordtn.R
-import com.example.securedatasharingfordtn.databinding.FragmentLoginBinding
+import it.unisa.dia.gas.jpbc.*
+import it.unisa.dia.gas.plaf.jpbc.pairing.*
+import java.io.InputStream
+
 
 class MainFragment : Fragment(R.layout.fragment_main){
 
+
+    var pair : Pairing = PairingFactory.getPairing("a.properties");
 }

@@ -1,7 +1,6 @@
 package com.example.securedatasharingfordtn.revoabe;
 
 import it.unisa.dia.gas.jpbc.Element;
-import com.example.securedatasharingfordtn.tree_type.MembershipTree;
 
 public class PublicKey{
 	MembershipTree membership_tree;
@@ -20,9 +19,10 @@ public class PublicKey{
 		e_gg_alpha = eg_alpha;
 		g1_a = gg1_a;
 	}
-
+	
 	public void printPublicKey() {
 		System.out.println("MembershipTree: "+membership_tree.toString());
+		membership_tree.printAllNodesBFS();
 		System.out.println("g1: "+g1.toString());
 		System.out.println("g2: "+g2.toString());
 		System.out.println("g2_beta: "+g2_beta.toString());
@@ -46,6 +46,10 @@ public class PublicKey{
 	}
 	public byte[] getE_gg_alpha() {
 		return e_gg_alpha.toBytes();
+	}
+	
+	public MembershipTree getMembershipTree() {
+		return membership_tree;
 	}
 
 	
