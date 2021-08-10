@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Set;
 public class MembershipTree{
 
@@ -16,6 +17,8 @@ public class MembershipTree{
 	Pairing group; //the pairing group
 	TreeNode root; //root of the tree
 	HashMap<Integer,TreeNode> user_id_to_leaf; //all leafnodes and ids
+	Random rd;
+	
 	
 	public MembershipTree(int maxNodes, Element g, Pairing pairingFactory) {
 		this.m = maxNodes;
@@ -25,15 +28,41 @@ public class MembershipTree{
 		this.root = createTree();
 	}
 	
+	public MembershipTree(int maxNodes, Element g, Pairing pairingFactory, long seed) {
+		this.m = maxNodes;
+		this.user_id_to_leaf = new HashMap<Integer, TreeNode>();
+		this.g1 = g;
+		this.group = pairingFactory;
+		this.root = createTree(seed);
+	}
+	
 	public TreeNode createTree() {
 		if(this.m<1) return null;
 		this.user_id_counter = 1;
 		return dfs(null,1,log2(this.m));
 	}
 	
+	public TreeNode createTree(long seed) {
+		if(this.m<1) return null;
+		this.user_id_counter = 1;
+		this.rd = new Random(seed);
+		return dfs(null,1,log2(this.m), true);
+	}
+	
+	
+	
 	private TreeNode createTreeNode(TreeNode parent, int y_i) {
-		//TreeNode node = new TreeNode(y_i, this.g1.powZn(this.group.getZr().newRandomElement()),parent);
 		Element currentRandom = this.group.getZr().newRandomElement();
+		Element curr = this.g1.powZn(currentRandom);
+		TreeNode node = new TreeNode(y_i,curr ,parent);
+		return node;
+	}
+	
+	private TreeNode createTreeNode(TreeNode parent, int y_i, boolean withSeed) {
+		byte[] rdBytes = new byte[4];
+		
+		rd.nextBytes(rdBytes);
+		Element currentRandom = this.group.getZr().newElementFromBytes(rdBytes);
 		Element curr = this.g1.powZn(currentRandom);
 		TreeNode node = new TreeNode(y_i,curr ,parent);
 		return node;
@@ -70,6 +99,25 @@ public class MembershipTree{
 		}
 		return node;
 	}
+	
+	private TreeNode dfs(TreeNode parent, int y_i, int h, boolean withSeed) {
+		TreeNode node = createTreeNode(parent, y_i, withSeed);
+		//node.printNode();
+		if (h == 0) {
+			node.user_id = this.user_id_counter;
+			this.user_id_to_leaf.put(this.user_id_counter, node);
+			this.user_id_counter+=1;
+			//return node;
+		}
+		else {
+			node.left = dfs(node,2*y_i,h-1,withSeed);
+			node.right = dfs(node, 2*y_i+1,h-1,withSeed);
+			//return node; 
+		}
+		return node;
+	}
+	
+	
 	
 	public List<TreeNode> getUserPath(int user_id){
 		List<TreeNode> ret = new ArrayList<TreeNode>();

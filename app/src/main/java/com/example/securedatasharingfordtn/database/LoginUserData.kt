@@ -36,9 +36,6 @@ data class LoginUserData(
     var userExpirationTimeMilli: Long = 0L,
 
     @ColumnInfo(name = "is_revoked")
-    var isRevoked: Boolean=false,
-
-    @ColumnInfo(typeAffinity = ColumnInfo.BINARY)
-    var testBinary: ByteArray? = null
+    var isRevoked: Boolean=false
 
 )

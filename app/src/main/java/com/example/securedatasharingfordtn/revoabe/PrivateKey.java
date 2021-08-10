@@ -1,11 +1,15 @@
 package com.example.securedatasharingfordtn.revoabe;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import com.example.securedatasharingfordtn.database.EntityHelper;
 import it.unisa.dia.gas.jpbc.Element;
+import it.unisa.dia.gas.jpbc.Pairing;
+import it.unisa.dia.gas.plaf.jpbc.util.Arrays;
 
 public class PrivateKey {
 	List<String> attr_list; //List of attributes
@@ -20,6 +24,86 @@ public class PrivateKey {
 		L = l;
 		k_y = ky;
 	}
+	
+	//	The following is how the bytes generated
+	//	os.write(EntityHelper.int_to_bytes(L.length));
+	//	os.write(L);
+	//	os.write(EntityHelper.stringList_to_bytes(attributes));
+	//	os.write(EntityHelper.stringList_to_bytes(attrSizes));
+	//	os.write(EntityHelper.int_to_bytes(k_is.length));
+	//	os.write(k_is);
+	//	os.write(EntityHelper.stringList_to_bytes(revoNodes));
+	//	os.write(EntityHelper.stringList_to_bytes(revoNodeSizes));
+	//	os.write(EntityHelper.int_to_bytes(k_ys.length));
+	//	os.write(k_ys);
+	//	The following constructor construct the privatekey from bytes
+	public PrivateKey(byte[] prikBytes, Pairing pair) {
+		ByteBuffer bf = ByteBuffer.wrap(prikBytes, 0, 4).order(ByteOrder.nativeOrder());
+		int start_l = 4;
+		int end_l = start_l + bf.getInt();
+		bf = ByteBuffer.wrap(prikBytes, end_l, 4).order(ByteOrder.nativeOrder());
+		int start_attr = end_l + 4;
+		int end_attr = start_attr +bf.getInt();
+		bf = ByteBuffer.wrap(prikBytes, end_attr, 4).order(ByteOrder.nativeOrder());
+		int start_attrSize = end_attr + 4;
+		int end_attrSize = start_attrSize +bf.getInt();
+		bf = ByteBuffer.wrap(prikBytes, end_attrSize, 4).order(ByteOrder.nativeOrder());
+		int start_kis = end_attrSize+4;
+		int end_kis = start_kis + bf.getInt();
+		this.L = pair.getG2().newElementFromBytes(Arrays.copyOfRange(prikBytes, start_l, end_l));
+		this.attr_list = EntityHelper.bytes_to_stringList(Arrays.copyOfRange(prikBytes, start_attr, end_attr));
+		List<String> attrSize = EntityHelper.bytes_to_stringList(Arrays.copyOfRange(prikBytes, start_attrSize, end_attrSize));
+		this.k_i = bytesToKis(this.attr_list,attrSize,Arrays.copyOfRange(prikBytes, start_kis, end_kis),pair);
+		
+		bf = ByteBuffer.wrap(prikBytes, end_kis, 4).order(ByteOrder.nativeOrder());
+		int start_nodes = end_kis + 4;
+		int end_nodes = start_nodes +bf.getInt();
+		bf = ByteBuffer.wrap(prikBytes, end_nodes, 4).order(ByteOrder.nativeOrder());
+		int start_nodeSize = end_nodes + 4;
+		int end_nodeSize = start_nodeSize +bf.getInt();
+		bf = ByteBuffer.wrap(prikBytes, end_nodeSize, 4).order(ByteOrder.nativeOrder());
+		int start_kys = end_nodeSize+4;
+		int end_kys = start_kys + bf.getInt();
+		List<String> node_list = EntityHelper.bytes_to_stringList(Arrays.copyOfRange(prikBytes, start_nodes, end_nodes));
+		List<String> nodeSize = EntityHelper.bytes_to_stringList(Arrays.copyOfRange(prikBytes, start_nodeSize, end_nodeSize));
+		this.k_y = bytesToKys(node_list,nodeSize,Arrays.copyOfRange(prikBytes, start_kys, end_kys),pair);
+	}
+	
+	public static HashMap<String,Element> bytesToKis(List<String> attrs, 
+			List<String> attrSizes, byte[] kisBytes, Pairing pair){
+		HashMap<String, Element> ret = new HashMap<String,Element>();
+		int startPosition = 0;
+		int counter = 0;
+		for(String attr: attrs) {
+			int curSize = Integer.parseInt(attrSizes.get(counter));
+			counter++;
+			Element curElement = pair.getG1().newElementFromBytes(
+					Arrays.copyOfRange(kisBytes, startPosition, startPosition+curSize));
+			ret.put(attr, curElement);
+			startPosition+=curSize;
+		}
+		return ret;
+	}
+	
+	public static HashMap<Integer,Element> bytesToKys(List<String> nodes, 
+			List<String> nodeSizes, byte[] kysBytes, Pairing pair){
+		HashMap<Integer, Element> ret = new HashMap<Integer,Element>();
+		int startPosition = 0;
+		int counter = 0;
+		for(String node: nodes) {
+			int nodeID = Integer.parseInt(node);
+			int curSize = Integer.parseInt(nodeSizes.get(counter));
+			counter++;
+			Element curElement = pair.getG1().newElementFromBytes(
+					Arrays.copyOfRange(kysBytes, startPosition, startPosition+curSize));
+			ret.put(nodeID, curElement);
+			startPosition+=curSize;
+		}
+		return ret;
+	}	
+	
+	
+	
 	
 	public void printPrivateKey() {
 		System.out.println("attribute list: "+attr_list.toString());
