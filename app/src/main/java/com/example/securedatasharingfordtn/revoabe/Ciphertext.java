@@ -7,8 +7,6 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
-import java.util.Set;
-
 import com.example.securedatasharingfordtn.database.EntityHelper;
 import it.unisa.dia.gas.jpbc.Element;
 import it.unisa.dia.gas.jpbc.Pairing;
@@ -18,15 +16,15 @@ import com.example.securedatasharingfordtn.policy_msp.MSP_Builder;
 public class Ciphertext {
 
 	//TODO: need to change to String rather than obj as cipher text are send as bytearray
-	BinNode policy;
-	Element C;
-	Element C_prime;
-	Element D;
-	HashMap<Integer, Element> C_y;
-	HashMap<String, Element> C_i;
-	byte[] ciphertext;
-	
-	String policyStr;
+	protected BinNode policy;
+	protected Element C;
+	protected Element C_prime;
+	protected Element D;
+	protected HashMap<Integer, Element> C_y;
+	protected HashMap<String, Element> C_i;
+	protected byte[] ciphertext;
+
+	protected String policyStr;
 	
 	public Ciphertext(BinNode policy, Element C, Element C_prime,Element D, 
 			HashMap<Integer, Element> C_y, HashMap<String, Element> C_i, byte[] aes_ci, String ps) {

@@ -8,27 +8,38 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.example.securedatasharingfordtn.database.DTNDataSharingDatabaseDao
+import com.example.securedatasharingfordtn.database.EntityHelper
 import com.example.securedatasharingfordtn.database.LoginUserData
 import com.example.securedatasharingfordtn.revoabe.PrivateKey
 import com.example.securedatasharingfordtn.revoabe.PublicKey
 import com.example.securedatasharingfordtn.revoabe.ReVo_ABE
 import com.example.securedatasharingfordtn.tree_type.MembershipTree
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.engine.android.*
 import kotlinx.coroutines.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.utils.io.*
+import io.ktor.utils.io.core.*
+import it.unisa.dia.gas.jpbc.Pairing
+import it.unisa.dia.gas.plaf.jpbc.pairing.PairingFactory
+import it.unisa.dia.gas.plaf.jpbc.util.Arrays
 import java.net.InetSocketAddress
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 class LoginViewModel(
     val database: DTNDataSharingDatabaseDao,
     application: Application): AndroidViewModel(application) {
 
-    private lateinit var curABE: ReVo_ABE
-    private lateinit var curPublicKey: PublicKey
-    private lateinit var curPrivateKey: PrivateKey
-    private lateinit var curTree: MembershipTree
+    private var keys: ByteArray = byteArrayOf()
+    private var pairingFileDir: String = ""
+    private lateinit var pairing : Pairing
+
+    private lateinit var publicKey: PublicKey
+    private lateinit var privateKey: PrivateKey
 
     val client = HttpClient(Android) {
         engine {
@@ -80,7 +91,17 @@ class LoginViewModel(
         get() = _setupOKEvent
     //try to login
     //login error snackbar indicator functions
-    fun doneSetupOKSnackbar(){
+    fun doneSetupOKSnackbar(dirForPairingFile : String){
+        this.pairingFileDir = dirForPairingFile
+
+        pairing = PairingFactory.getPairing(this.pairingFileDir)
+
+        val publickeySize = ByteBuffer.wrap(keys,0,4).order(ByteOrder.nativeOrder()).getInt()
+        val privatekeySize = ByteBuffer.wrap(keys,publickeySize+4,4).order(ByteOrder.nativeOrder()).getInt()
+        Log.i("login", "publickey size: "+publickeySize+", privatekey size: "+privatekeySize)
+        this.publicKey = PublicKey(Arrays.copyOfRange(this.keys,4,publickeySize+4),this.pairing)
+        this.privateKey = PrivateKey(Arrays.copyOfRange(this.keys,8+publickeySize,8+publickeySize+privatekeySize),this.pairing)
+
         _setupOKEvent.value = false
     }
 
@@ -107,6 +128,7 @@ class LoginViewModel(
         lastLoginTime.value = 0L
         _useCameraEvent.value = false
         _viewPasswordEvent.value = false
+
     }
 
     //database query functions
@@ -143,10 +165,19 @@ class LoginViewModel(
 
         uiScope.
         launch {
-            val response: HttpResponse = client.post("http://131.151.90.204:8080/ReVo_webtest/Bootstrap"){
+            val response: HttpResponse = client.post("http://131.151.90.204:8081/ReVo_webtest/Bootstrap"){
                 body = "{\"username\": \"${username.value}\",\"password\": \"${password.value}\",\"missionCode\":\"${missionCode.value}\"}"
             }
+
             if(response.status.value==200){
+                val channel: ByteReadChannel = response.receive()
+                while(!channel.isClosedForRead){
+                    val packet = channel.readRemaining(DEFAULT_BUFFER_SIZE.toLong())
+                    while(!packet.isEmpty){
+                        keys=keys.plus(packet.readBytes())
+
+                    }
+                }
                 _setupOKEvent.value=true
             }else{
                 _registerFailSnackbarEvent.value=true
@@ -163,7 +194,9 @@ class LoginViewModel(
         }
     }
 
-
+    fun getKeysByteSize() : Int{
+        return keys.size
+    }
 
 
 

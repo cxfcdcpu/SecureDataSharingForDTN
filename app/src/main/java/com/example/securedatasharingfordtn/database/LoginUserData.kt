@@ -20,12 +20,6 @@ data class LoginUserData(
     @ColumnInfo(name = "user_attribute")
     var userAttribute: String="",
 
-    @ColumnInfo(name = "user_public_key")
-    var userMasterKey: String="",
-
-    @ColumnInfo(name = "user_private_key")
-    var userPrivateKey: String="",
-
     @ColumnInfo(name = "recent_login_time")
     var recentLoginTimeMilli: Long = System.currentTimeMillis(),
 
@@ -36,6 +30,23 @@ data class LoginUserData(
     var userExpirationTimeMilli: Long = 0L,
 
     @ColumnInfo(name = "is_revoked")
-    var isRevoked: Boolean=false
+    var isRevoked: Boolean=false,
 
-)
+    @ColumnInfo(name = "keys")
+    var keys: ByteArray = byteArrayOf()
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as LoginUserData
+
+        if (!keys.contentEquals(other.keys)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return keys.contentHashCode()
+    }
+}

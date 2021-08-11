@@ -2,6 +2,7 @@ package com.example.securedatasharingfordtn.revoabe;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -14,7 +15,22 @@ public class AES {
  
     //private static SecretKeySpec secretKey;
     //private static byte[] key;
- 
+
+    public static String hashPassword(String password){
+        MessageDigest sha = null;
+        byte[] key = password.getBytes(StandardCharsets.UTF_8);
+        try {
+            sha = MessageDigest.getInstance("SHA-256");
+            byte[] newKey = sha.digest(key);
+            return new String(newKey);
+        }
+        catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return password;
+    }
+
+
     public static SecretKeySpec setKey(byte[] key) 
     {
         MessageDigest sha = null;

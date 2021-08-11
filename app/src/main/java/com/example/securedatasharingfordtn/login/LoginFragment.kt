@@ -114,7 +114,7 @@ class LoginFragment : Fragment()  {
         })
     }
 
-    fun hardcodedCurveFileDir(): String? {
+    fun hardcodedCurveFileDir(): String {
         if ("a.properties" !in context!!.fileList()){
             val am = context!!.assets
             val filename = "a.properties"
@@ -188,12 +188,14 @@ class LoginFragment : Fragment()  {
             if (it == true) { // Observed state is true.
                 Snackbar.make(
                     requireActivity().findViewById(android.R.id.content),
-                    "Setup user account Successfully.",
+                            "Received public and private keys as a byte array with size: "
+                            +loginViewModel.getKeysByteSize() +" Bytes. Pairing Dir is: "
+                            +this.hardcodedCurveFileDir(),
                     Snackbar.LENGTH_SHORT // How long to display the message.
                 ).show()
                 // Reset state to make sure the snackbar is only shown once, even if the device
                 // has a configuration change.
-                loginViewModel.doneSetupOKSnackbar()
+                loginViewModel.doneSetupOKSnackbar(hardcodedCurveFileDir())
             }
         })
     }

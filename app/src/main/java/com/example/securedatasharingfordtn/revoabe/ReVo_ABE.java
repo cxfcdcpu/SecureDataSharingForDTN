@@ -9,7 +9,7 @@ import java.util.Set;
 import it.unisa.dia.gas.jpbc.*;
 import com.example.securedatasharingfordtn.policy_msp.BinNode;
 import com.example.securedatasharingfordtn.policy_msp.MSP_Builder;
-
+import com.example.securedatasharingfordtn.revoabe.Ciphertext;
 
 
 public class ReVo_ABE {
@@ -176,7 +176,7 @@ public class ReVo_ABE {
 		Element C = (pk.e_gg_alpha.powZn(s)).mul(seed).getImmutable();
 		byte[] aes_ci = AES.encrypt(msg, seed.toBytes());
 		
-		return new Ciphertext(policy, C, C_prime, D, C_y, C_i,aes_ci);		
+		return new Ciphertext(policy, C, C_prime, D, C_y, C_i,aes_ci,policyString);
 	}
 	
 	
@@ -223,7 +223,7 @@ public class ReVo_ABE {
 		Element C = (pk.e_gg_alpha.powZn(s)).mul(seed).getImmutable();
 		byte[] aes_ci = AES.encrypt(msg, seed.toBytes());
 		
-		return new Ciphertext(policy, C, C_prime, D, C_y, C_i,aes_ci);		
+		return new Ciphertext(policy, C, C_prime, D, C_y, C_i,aes_ci,policyString );
 	}
 	
 	

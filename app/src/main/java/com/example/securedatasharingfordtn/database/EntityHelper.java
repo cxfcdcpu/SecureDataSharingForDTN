@@ -43,6 +43,10 @@ public class EntityHelper {
 			System.out.println(s);
 		}
 	}
+
+	public static void testKotlinByteArray(byte[] kotlinByteArray){
+
+	}
 	
 	
 }
