@@ -62,6 +62,7 @@ dependencies {
     implementation files('libs/antlr-4.9.2-complete.jar')
     implementation files('libs/java-json.jar')
 
+
     kapt "androidx.room:room-compiler:$version_room"
     implementation "androidx.lifecycle:lifecycle-extensions:$version_lifecycle_extensions"
 
@@ -97,6 +98,14 @@ dependencies {
     // If you want to additionally use the CameraX Extensions library
     implementation("androidx.camera:camera-extensions:1.0.0-alpha25")
 
+    implementation 'androidx.fragment:fragment-ktx:1.3.6'
 
+    def activity_version = "1.3.1"
+
+    // Java language implementation
+    implementation "androidx.activity:activity:$activity_version"
+    // Kotlin
+    implementation "androidx.activity:activity-ktx:$activity_version"
+    implementation "io.ktor:ktor-client-gson:$ktor_version"
 
 }

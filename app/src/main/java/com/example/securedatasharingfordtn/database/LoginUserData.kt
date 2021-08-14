@@ -9,25 +9,25 @@ data class LoginUserData(
     var userId: Long = 0L,
 
     @ColumnInfo(name = "user_name")
-    var userName: String="",
+    var username: String="",
 
     @ColumnInfo(name = "user_password")
-    var userPassword: String="",
+    var password: String="",
 
     @ColumnInfo(name = "mission_id")
     var mission: Long = 0L,
 
     @ColumnInfo(name = "user_attribute")
-    var userAttribute: String="",
+    var attributes: String="",
 
     @ColumnInfo(name = "recent_login_time")
     var recentLoginTimeMilli: Long = System.currentTimeMillis(),
 
     @ColumnInfo(name = "user_register_time")
-    val userRegisterTimeMilli: Long = System.currentTimeMillis(),
+    val registerationTime: Long = System.currentTimeMillis(),
 
     @ColumnInfo(name = "user_expiration_time")
-    var userExpirationTimeMilli: Long = 0L,
+    var expirationDate: Long = 0L,
 
     @ColumnInfo(name = "is_revoked")
     var isRevoked: Boolean=false,

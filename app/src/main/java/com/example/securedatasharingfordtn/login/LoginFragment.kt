@@ -23,6 +23,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.budiyev.android.codescanner.*
 import com.example.securedatasharingfordtn.R
+import com.example.securedatasharingfordtn.SharedViewModel
 import com.example.securedatasharingfordtn.database.DTNDataSharingDatabase
 import com.example.securedatasharingfordtn.databinding.FragmentLoginBinding
 import com.google.android.material.snackbar.Snackbar
@@ -54,7 +55,7 @@ class LoginFragment : Fragment()  {
     private lateinit var windowManager: WindowManager
     /** Blocking camera operations are performed using this executor */
     private lateinit var cameraExecutor: ExecutorService
-
+    private var sharedModel=ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -115,8 +116,8 @@ class LoginFragment : Fragment()  {
     }
 
     fun hardcodedCurveFileDir(): String {
-        if ("a.properties" !in context!!.fileList()){
-            val am = context!!.assets
+        if ("a.properties" !in requireContext().fileList()){
+            val am = requireContext().assets
             val filename = "a.properties"
             val inputStream: InputStream = am.open(filename)
 
@@ -124,7 +125,7 @@ class LoginFragment : Fragment()  {
                 it.write(inputStream.readBytes())
             }
         }
-        return context!!.filesDir.absolutePath+"/a.properties"
+        return requireContext().filesDir.absolutePath+"/a.properties"
     }
 
     fun observeTabSelection(binding: FragmentLoginBinding,loginViewModel: LoginViewModel){
@@ -195,7 +196,9 @@ class LoginFragment : Fragment()  {
                 ).show()
                 // Reset state to make sure the snackbar is only shown once, even if the device
                 // has a configuration change.
-                loginViewModel.doneSetupOKSnackbar(hardcodedCurveFileDir())
+                loginViewModel.doneSetupOKSnackbar()
+                sharedModel.bootstrap(hardcodedCurveFileDir(),loginViewModel.getKeys())
+
             }
         })
     }

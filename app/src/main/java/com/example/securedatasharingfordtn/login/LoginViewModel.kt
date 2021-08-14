@@ -17,6 +17,7 @@ import com.example.securedatasharingfordtn.tree_type.MembershipTree
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.android.*
+import io.ktor.client.features.json.*
 import kotlinx.coroutines.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -35,16 +36,14 @@ class LoginViewModel(
     application: Application): AndroidViewModel(application) {
 
     private var keys: ByteArray = byteArrayOf()
-    private var pairingFileDir: String = ""
-    private lateinit var pairing : Pairing
-
-    private lateinit var publicKey: PublicKey
-    private lateinit var privateKey: PrivateKey
 
     val client = HttpClient(Android) {
         engine {
             connectTimeout = 100_000
             socketTimeout = 100_000
+        }
+        install(JsonFeature){
+            serializer = GsonSerializer()
         }
     }
 
@@ -91,19 +90,12 @@ class LoginViewModel(
         get() = _setupOKEvent
     //try to login
     //login error snackbar indicator functions
-    fun doneSetupOKSnackbar(dirForPairingFile : String){
-        this.pairingFileDir = dirForPairingFile
+    fun doneSetupOKSnackbar(){
 
-        pairing = PairingFactory.getPairing(this.pairingFileDir)
-
-        val publickeySize = ByteBuffer.wrap(keys,0,4).order(ByteOrder.nativeOrder()).getInt()
-        val privatekeySize = ByteBuffer.wrap(keys,publickeySize+4,4).order(ByteOrder.nativeOrder()).getInt()
-        Log.i("login", "publickey size: "+publickeySize+", privatekey size: "+privatekeySize)
-        this.publicKey = PublicKey(Arrays.copyOfRange(this.keys,4,publickeySize+4),this.pairing)
-        this.privateKey = PrivateKey(Arrays.copyOfRange(this.keys,8+publickeySize,8+publickeySize+privatekeySize),this.pairing)
 
         _setupOKEvent.value = false
     }
+
 
 
     //when user click setup button
@@ -138,24 +130,13 @@ class LoginViewModel(
 
         uiScope.launch {
             val tryUser = tryLogin() //database.tryLogin(username.value!!,password.value!!)
-            if(tryUser!=null && tryUser.userExpirationTimeMilli > System.currentTimeMillis()){
+            if(tryUser!=null && tryUser.expirationDate > System.currentTimeMillis()){
                 tryUser.recentLoginTimeMilli = System.currentTimeMillis()
                 update(tryUser)
                 _validUser.value=tryUser
                 onTestRedirect()
             }
-            else{
-                val newData = LoginUserData()
-                newData.userName = username.value!!
-                newData.userPassword = password.value!!
-                newData.userExpirationTimeMilli = 2* System.currentTimeMillis()
-                Log.i("Login", "after Login:" +newData.userName+ " " +newData.userPassword)
-                insert(newData)
-                onTestSnackbar()
-            }
-//            val newData = LoginUserData()
-//            insert(newData)
-//            lastLoginTime.value = newData.recentLoginTimeMilli
+
 
         }
 
@@ -187,6 +168,24 @@ class LoginViewModel(
 
     }
 
+    fun fetchUserFromServer(){
+        uiScope.
+        launch {
+            val response: HttpResponse = client.post("http://131.151.90.204:8081/ReVo_webtest/SearchUser"){
+                body = "{\"username\": \"${username.value}\", \"password\": \"${password.value}\"}"
+            }
+
+            if(response.status.value==200){
+
+                _setupOKEvent.value=true
+            }else{
+                _registerFailSnackbarEvent.value=true
+            }
+        }
+    }
+
+
+
     private suspend fun tryLogin(): LoginUserData?{
         return withContext(Dispatchers.IO){
             val tryUser = database.tryLogin(username.value!!,password.value!!)
@@ -199,7 +198,9 @@ class LoginViewModel(
     }
 
 
-
+    fun getKeys(): ByteArray{
+        return this.keys
+    }
 
     private suspend fun insert(data: LoginUserData) {
         withContext(Dispatchers.IO) {
