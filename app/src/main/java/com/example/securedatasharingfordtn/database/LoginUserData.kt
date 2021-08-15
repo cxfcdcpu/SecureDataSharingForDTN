@@ -29,9 +29,6 @@ data class LoginUserData(
     @ColumnInfo(name = "user_expiration_time")
     var expirationDate: Long = 0L,
 
-    @ColumnInfo(name = "is_revoked")
-    var isRevoked: Boolean=false,
-
     @ColumnInfo(name = "keys")
     var keys: ByteArray = byteArrayOf()
 ) {

@@ -101,9 +101,20 @@ class LoginViewModel(
     //try to login
     //login error snackbar indicator functions
     fun doneSetupOKSnackbar(){
-        fetchUserFromServer()
-
         _setupOKEvent.value = false
+        runBlocking { // this: CoroutineScope
+            launch { // launch a new coroutine and continue
+                fetchUserFromServer()
+
+
+            }
+
+            insert(user)
+
+
+        }
+
+
     }
 
 
@@ -144,7 +155,10 @@ class LoginViewModel(
                 tryUser.recentLoginTimeMilli = System.currentTimeMillis()
                 update(tryUser)
                 _validUser.value=tryUser
+                Log.i("Login", "find user in the database")
                 onTestRedirect()
+            }else{
+                onTestSnackbar();
             }
 
 
@@ -161,14 +175,6 @@ class LoginViewModel(
             }
 
             if(response.status.value==200){
-//                val channel: ByteReadChannel = response.receive()
-//                while(!channel.isClosedForRead){
-//                    val packet = channel.readRemaining(DEFAULT_BUFFER_SIZE.toLong())
-//                    while(!packet.isEmpty){
-//                        keys=keys.plus(packet.readBytes())
-//
-//                    }
-//                }
                 keys = response.readBytes()
 
                 _setupOKEvent.value=true
@@ -180,7 +186,9 @@ class LoginViewModel(
 
     }
 
-    fun fetchUserFromServer(){
+    private suspend fun fetchUserFromServer(){
+
+
         uiScope.
         launch {
             val response: HttpResponse = client.post("http://131.151.90.204:8081/ReVo_webtest/SearchUser"){
@@ -189,11 +197,14 @@ class LoginViewModel(
 
             if(response.status.value==200){
                 val userInfo: UserInfo = response.receive()
-//                user = LoginUserData(userInfo.userID, userInfo.username, userInfo.password,
-//                                missionCode.value!!.toLong(),userInfo.attributesString,
-//                                HelperFunctions.convertStringToTimestamp(userInfo.registerTime),
-                //)
-            }else{
+                val rt = HelperFunctions.convertDateStringToLong(userInfo.registerTime)
+                val et = HelperFunctions.convertDateStringToLong(userInfo.expirationDate)
+
+                user = LoginUserData(userInfo.userID, userInfo.username, userInfo.password
+                    ,missionCode.value!!.toLong(),userInfo.attributesString
+                    ,System.currentTimeMillis(), rt, et, keys)
+                Log.i("Login", "Private user: "+userInfo.string)
+
 
             }
         }

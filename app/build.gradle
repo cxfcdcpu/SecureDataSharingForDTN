@@ -107,5 +107,4 @@ dependencies {
     // Kotlin
     implementation "androidx.activity:activity-ktx:$activity_version"
     implementation "io.ktor:ktor-client-gson:$ktor_version"
-
 }

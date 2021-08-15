@@ -97,7 +97,7 @@ class LoginFragment : Fragment()  {
     }
 
 
-    fun subscribeTab(binding: FragmentLoginBinding,loginViewModel: LoginViewModel){
+    private fun subscribeTab(binding: FragmentLoginBinding, loginViewModel: LoginViewModel){
         binding.loginSetupTab.addOnTabSelectedListener(object :
             TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
@@ -115,7 +115,7 @@ class LoginFragment : Fragment()  {
         })
     }
 
-    fun hardcodedCurveFileDir(): String {
+    private fun hardcodedCurveFileDir(): String {
         if ("a.properties" !in requireContext().fileList()){
             val am = requireContext().assets
             val filename = "a.properties"
@@ -128,7 +128,7 @@ class LoginFragment : Fragment()  {
         return requireContext().filesDir.absolutePath+"/a.properties"
     }
 
-    fun observeTabSelection(binding: FragmentLoginBinding,loginViewModel: LoginViewModel){
+    private fun observeTabSelection(binding: FragmentLoginBinding, loginViewModel: LoginViewModel){
         loginViewModel.tabSelect.observe(viewLifecycleOwner, Observer {
             if(it == true){
                 binding.button.visibility=View.VISIBLE
@@ -154,7 +154,7 @@ class LoginFragment : Fragment()  {
         })
     }
 
-    fun observeLoginFailEvent(loginViewModel: LoginViewModel){
+    private fun observeLoginFailEvent(loginViewModel: LoginViewModel){
         loginViewModel.loginFailSnackbarEvent.observe(viewLifecycleOwner, Observer {
             if (it == true) { // Observed state is true.
                 Snackbar.make(
@@ -169,7 +169,7 @@ class LoginFragment : Fragment()  {
         })
     }
 
-    fun observeRegisterFailEvent(loginViewModel: LoginViewModel){
+    private fun observeRegisterFailEvent(loginViewModel: LoginViewModel){
         loginViewModel.registerFailSnackbarEvent.observe(viewLifecycleOwner, Observer {
             if (it == true) { // Observed state is true.
                 Snackbar.make(
@@ -184,7 +184,7 @@ class LoginFragment : Fragment()  {
         })
     }
 
-    fun observeSetupOKEvent(loginViewModel: LoginViewModel, sharedModel:SharedViewModel){
+    private fun observeSetupOKEvent(loginViewModel: LoginViewModel, sharedModel:SharedViewModel){
         loginViewModel.setupOKEvent.observe(viewLifecycleOwner, Observer {
             if (it == true) { // Observed state is true.
                 Snackbar.make(
@@ -206,7 +206,7 @@ class LoginFragment : Fragment()  {
 
 
 
-    fun observeCameraEvent(loginViewModel: LoginViewModel){
+    private fun observeCameraEvent(loginViewModel: LoginViewModel){
         //also give bind the viewFinder with click ability
         binding.viewFinder.setOnClickListener {
             viewFinder.startPreview()
@@ -231,7 +231,7 @@ class LoginFragment : Fragment()  {
         })
     }
 
-    fun observeViewPasswordEvent(loginViewModel: LoginViewModel){
+    private fun observeViewPasswordEvent(loginViewModel: LoginViewModel){
 
         loginViewModel.viewPasswordEvent.observe(viewLifecycleOwner, Observer {
             if(it == true){

@@ -213,8 +213,8 @@
 
                 android:layout_marginTop="32dp"
 
-                android:backgroundTint="@{((loginViewModel.password==&quot;&quot;)||(loginViewModel.username==&quot;&quot;))?@color/gray:@color/purple_700}"
-                android:clickable="@{((loginViewModel.password==&quot;&quot;)||(loginViewModel.username==&quot;&quot;))?false:true}"
+                android:backgroundTint="@{((editTextTextPassword.text==&quot;&quot;)||(editTextTextPassword.text==&quot;&quot;))?@color/gray:@color/purple_700}"
+                android:clickable="@{((editTextTextPassword.text==&quot;&quot;)||(editTextTextPassword.text==&quot;&quot;))?false:true}"
                 android:onClick="@{() -> loginViewModel.tryLoginEvent()}"
                 android:text="@string/button_login"
                 android:visibility="visible"
@@ -227,8 +227,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
-                android:backgroundTint="@{((loginViewModel.password==&quot;&quot;)||(loginViewModel.username==&quot;&quot;)||(loginViewModel.missionCode==&quot;&quot;))?@color/gray:@color/purple_700}"
-                android:clickable="@{((loginViewModel.password==&quot;&quot;)||(loginViewModel.username==&quot;&quot;)||(loginViewModel.missionCode==&quot;&quot;))?false:true}"
+                android:backgroundTint="@{((editTextTextPassword.text==&quot;&quot;)||(editTextTextPassword.text==&quot;&quot;)||(editTextNumberPassword.text==&quot;&quot;))?@color/gray:@color/purple_700}"
+                android:clickable="@{((editTextTextPassword.text==&quot;&quot;)||(editTextTextPassword.text==&quot;&quot;)||(editTextNumberPassword.text==&quot;&quot;))?false:true}"
                 android:onClick="@{() ->loginViewModel.trySetupEvent()}"
                 android:text="@string/button_setup"
                 android:visibility="invisible"
