@@ -55,7 +55,7 @@ class LoginFragment : Fragment()  {
     private lateinit var windowManager: WindowManager
     /** Blocking camera operations are performed using this executor */
     private lateinit var cameraExecutor: ExecutorService
-    private var sharedModel=ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -72,7 +72,7 @@ class LoginFragment : Fragment()  {
         val dataSource = DTNDataSharingDatabase.getInstance(application).dataSharingDatabaseDao
 
         val viewModelFactory = LoginViewModelFactory(dataSource, application)
-
+        var sharedModel=ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
         val loginViewModel = ViewModelProvider(
             this,viewModelFactory).get(LoginViewModel::class.java)
         viewFinder = CodeScanner(requireContext(), binding.viewFinder)
@@ -86,7 +86,7 @@ class LoginFragment : Fragment()  {
 
         //show snackbar after setup
         observeRegisterFailEvent(loginViewModel)
-        observeSetupOKEvent(loginViewModel)
+        observeSetupOKEvent(loginViewModel, sharedModel)
         //use camera when camera clicked
         observeCameraEvent(loginViewModel)
         //view password
@@ -120,7 +120,7 @@ class LoginFragment : Fragment()  {
             val am = requireContext().assets
             val filename = "a.properties"
             val inputStream: InputStream = am.open(filename)
-
+            Log.i("Login", "creating properties to: "+ requireContext().filesDir.absolutePath)
             requireContext().openFileOutput(filename, Context.MODE_PRIVATE).use {
                 it.write(inputStream.readBytes())
             }
@@ -184,7 +184,7 @@ class LoginFragment : Fragment()  {
         })
     }
 
-    fun observeSetupOKEvent(loginViewModel: LoginViewModel){
+    fun observeSetupOKEvent(loginViewModel: LoginViewModel, sharedModel:SharedViewModel){
         loginViewModel.setupOKEvent.observe(viewLifecycleOwner, Observer {
             if (it == true) { // Observed state is true.
                 Snackbar.make(

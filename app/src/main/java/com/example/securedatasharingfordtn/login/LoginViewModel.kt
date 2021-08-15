@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import com.example.securedatasharingfordtn.HelperFunctions
 import com.example.securedatasharingfordtn.database.DTNDataSharingDatabaseDao
 import com.example.securedatasharingfordtn.database.EntityHelper
 import com.example.securedatasharingfordtn.database.LoginUserData
@@ -30,13 +31,22 @@ import it.unisa.dia.gas.plaf.jpbc.util.Arrays
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.sql.Timestamp
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+
+
+
+
+
+
 
 class LoginViewModel(
     val database: DTNDataSharingDatabaseDao,
     application: Application): AndroidViewModel(application) {
 
     private var keys: ByteArray = byteArrayOf()
-
+    private lateinit var user: LoginUserData
     val client = HttpClient(Android) {
         engine {
             connectTimeout = 100_000
@@ -91,7 +101,7 @@ class LoginViewModel(
     //try to login
     //login error snackbar indicator functions
     fun doneSetupOKSnackbar(){
-
+        fetchUserFromServer()
 
         _setupOKEvent.value = false
     }
@@ -151,14 +161,16 @@ class LoginViewModel(
             }
 
             if(response.status.value==200){
-                val channel: ByteReadChannel = response.receive()
-                while(!channel.isClosedForRead){
-                    val packet = channel.readRemaining(DEFAULT_BUFFER_SIZE.toLong())
-                    while(!packet.isEmpty){
-                        keys=keys.plus(packet.readBytes())
+//                val channel: ByteReadChannel = response.receive()
+//                while(!channel.isClosedForRead){
+//                    val packet = channel.readRemaining(DEFAULT_BUFFER_SIZE.toLong())
+//                    while(!packet.isEmpty){
+//                        keys=keys.plus(packet.readBytes())
+//
+//                    }
+//                }
+                keys = response.readBytes()
 
-                    }
-                }
                 _setupOKEvent.value=true
             }else{
                 _registerFailSnackbarEvent.value=true
@@ -176,10 +188,13 @@ class LoginViewModel(
             }
 
             if(response.status.value==200){
-
-                _setupOKEvent.value=true
+                val userInfo: UserInfo = response.receive()
+//                user = LoginUserData(userInfo.userID, userInfo.username, userInfo.password,
+//                                missionCode.value!!.toLong(),userInfo.attributesString,
+//                                HelperFunctions.convertStringToTimestamp(userInfo.registerTime),
+                //)
             }else{
-                _registerFailSnackbarEvent.value=true
+
             }
         }
     }

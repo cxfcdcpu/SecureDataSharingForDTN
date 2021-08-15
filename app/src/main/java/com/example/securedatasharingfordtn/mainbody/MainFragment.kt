@@ -11,7 +11,7 @@ import com.example.securedatasharingfordtn.login.*
 import java.io.InputStream
 class MainFragment : Fragment(R.layout.fragment_main){
 
-    val sharedModel=ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
+    //val sharedModel=ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
 
     var pair : Pairing = PairingFactory.getPairing("a.properties");
 }
