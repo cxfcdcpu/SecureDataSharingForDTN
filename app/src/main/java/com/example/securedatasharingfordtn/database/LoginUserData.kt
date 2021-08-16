@@ -14,6 +14,12 @@ data class LoginUserData(
     @ColumnInfo(name = "user_password")
     var password: String="",
 
+    @ColumnInfo(name = "first_name")
+    var firstname: String="",
+
+    @ColumnInfo(name = "last_name")
+    var lastname: String="",
+
     @ColumnInfo(name = "mission_id")
     var mission: Long = 0L,
 
@@ -46,4 +52,6 @@ data class LoginUserData(
     override fun hashCode(): Int {
         return keys.contentHashCode()
     }
+
+
 }

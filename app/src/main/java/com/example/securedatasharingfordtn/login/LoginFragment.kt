@@ -21,6 +21,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import com.budiyev.android.codescanner.*
 import com.example.securedatasharingfordtn.R
 import com.example.securedatasharingfordtn.SharedViewModel
@@ -86,7 +88,9 @@ class LoginFragment : Fragment()  {
 
         //show snackbar after setup
         observeRegisterFailEvent(loginViewModel)
-        observeSetupOKEvent(loginViewModel, sharedModel)
+        observeSetupOKEvent(loginViewModel)
+        //direct to main page
+        observeDirectToMainEvent(loginViewModel,sharedModel)
         //use camera when camera clicked
         observeCameraEvent(loginViewModel)
         //view password
@@ -184,7 +188,7 @@ class LoginFragment : Fragment()  {
         })
     }
 
-    private fun observeSetupOKEvent(loginViewModel: LoginViewModel, sharedModel:SharedViewModel){
+    private fun observeSetupOKEvent(loginViewModel: LoginViewModel){
         loginViewModel.setupOKEvent.observe(viewLifecycleOwner, Observer {
             if (it == true) { // Observed state is true.
                 Snackbar.make(
@@ -197,7 +201,18 @@ class LoginFragment : Fragment()  {
                 // Reset state to make sure the snackbar is only shown once, even if the device
                 // has a configuration change.
                 loginViewModel.doneSetupOKSnackbar()
-                sharedModel.bootstrap(hardcodedCurveFileDir(),loginViewModel.getKeys())
+
+            }
+        })
+    }
+
+
+    private fun observeDirectToMainEvent(loginViewModel: LoginViewModel, sharedModel:SharedViewModel){
+        loginViewModel.directToMainEvent.observe(viewLifecycleOwner, Observer {
+            if (it == true) { // Observed state is true.
+                sharedModel.bootstrap(hardcodedCurveFileDir(),loginViewModel.getUser())
+                loginViewModel.doneDirectToMainEvent()
+                view?.findNavController()?.navigate(R.id.action_loginFragment_to_mainFragment)
 
             }
         })

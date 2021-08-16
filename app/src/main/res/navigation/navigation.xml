@@ -18,5 +18,16 @@
         android:name="com.example.securedatasharingfordtn.mainbody.MainFragment"
         android:label="MainFragment"
         tools:layout="@layout/fragment_main"
+        >
+        <action
+            android:id="@+id/action_mainFragment_to_connectionFragment"
+            app:destination="@id/connectionFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/connectionFragment"
+        android:name="com.example.securedatasharingfordtn.connection.ConnectionFragment"
+        android:label="ConnectionFragment"
+        tools:layout="@layout/fragment_connection"
+
         />
 </navigation>

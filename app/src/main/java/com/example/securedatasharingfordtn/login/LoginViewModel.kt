@@ -36,11 +36,6 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 
 
-
-
-
-
-
 class LoginViewModel(
     val database: DTNDataSharingDatabaseDao,
     application: Application): AndroidViewModel(application) {
@@ -61,11 +56,6 @@ class LoginViewModel(
     private var viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
-    //user information livedata
-    private var _validUser = MutableLiveData<LoginUserData?>()
-    val validUser: LiveData<LoginUserData?>
-        get() = _validUser
-
 
     //properties
     val username = MutableLiveData<String>()
@@ -74,7 +64,14 @@ class LoginViewModel(
     val lastLoginTime = MutableLiveData<Long>()
     var tabSelect = MutableLiveData<Boolean>()
 
-
+    //login error snackbar indicator
+    private var _directToMainEvent = MutableLiveData<Boolean>()
+    val directToMainEvent: LiveData<Boolean>
+        get() = _directToMainEvent
+    //login error snackbar indicator functions
+    fun doneDirectToMainEvent(){
+        _directToMainEvent.value = false
+    }
 
     //login error snackbar indicator
     private var _loginFailSnackbarEvent = MutableLiveData<Boolean>()
@@ -101,19 +98,25 @@ class LoginViewModel(
     //try to login
     //login error snackbar indicator functions
     fun doneSetupOKSnackbar(){
-        _setupOKEvent.value = false
-        runBlocking { // this: CoroutineScope
-            launch { // launch a new coroutine and continue
-                fetchUserFromServer()
 
-
-            }
-
-            insert(user)
-
+        runBlocking {
+            fetchUserFromServer()
 
         }
+        runBlocking {
+            launch {
+                if (user != null) {
+                    insert(user)
+                    Log.i("Login", "insert into database successcully")
+                } else {
+                    Log.i("Login", "can't insert User to the database")
+                }
 
+            }
+        }
+
+        _setupOKEvent.value = false
+        onTestRedirect()
 
     }
 
@@ -149,18 +152,22 @@ class LoginViewModel(
 
         Log.i("Login", "before Login:" + username.value+ " " +password.value)
 
-        uiScope.launch {
+        runBlocking {
             val tryUser = tryLogin() //database.tryLogin(username.value!!,password.value!!)
-            if(tryUser!=null && tryUser.expirationDate > System.currentTimeMillis()){
-                tryUser.recentLoginTimeMilli = System.currentTimeMillis()
-                update(tryUser)
-                _validUser.value=tryUser
+
+            //TO-DO, add user with none expired date.
+            if(tryUser!=null && (true || tryUser.expirationDate > System.currentTimeMillis())){
+                runBlocking {
+                    tryUser.recentLoginTimeMilli = System.currentTimeMillis()
+                    update(tryUser)
+                    user = tryUser
+                }
+
                 Log.i("Login", "find user in the database")
                 onTestRedirect()
             }else{
                 onTestSnackbar();
             }
-
 
         }
 
@@ -189,23 +196,34 @@ class LoginViewModel(
     private suspend fun fetchUserFromServer(){
 
 
-        uiScope.
-        launch {
-            val response: HttpResponse = client.post("http://131.151.90.204:8081/ReVo_webtest/SearchUser"){
-                body = "{\"username\": \"${username.value}\", \"password\": \"${password.value}\"}"
-            }
+        runBlocking {
+            launch {
+                val response: HttpResponse =
+                    client.post("http://131.151.90.204:8081/ReVo_webtest/SearchUser") {
+                        body =
+                            "{\"username\": \"${username.value}\", \"password\": \"${password.value}\"}"
+                    }
 
-            if(response.status.value==200){
-                val userInfo: UserInfo = response.receive()
-                val rt = HelperFunctions.convertDateStringToLong(userInfo.registerTime)
-                val et = HelperFunctions.convertDateStringToLong(userInfo.expirationDate)
+                if (response.status.value == 200) {
+                    val userInfo: UserInfo = response.receive()
+                    val rt = HelperFunctions.convertDateStringToLong(userInfo.registerTime)
+                    val et = HelperFunctions.convertDateStringToLong(userInfo.expirationDate)
 
-                user = LoginUserData(userInfo.userID, userInfo.username, userInfo.password
-                    ,missionCode.value!!.toLong(),userInfo.attributesString
-                    ,System.currentTimeMillis(), rt, et, keys)
-                Log.i("Login", "Private user: "+userInfo.string)
+                    if (rt!=0L && et != 0L) {
+                        user = LoginUserData(
+                            username = userInfo.username,
+                            password = userInfo.password,
+                            mission = missionCode.value!!.toLong(),
+                            attributes = userInfo.attributesString,
+                            recentLoginTimeMilli = System.currentTimeMillis(),
+                            registerationTime = rt,
+                            expirationDate = et,
+                            keys = keys
+                        )
+                        Log.i("Login", "Private user: " + userInfo.string)
+                    }
 
-
+                }
             }
         }
     }
@@ -226,6 +244,10 @@ class LoginViewModel(
 
     fun getKeys(): ByteArray{
         return this.keys
+    }
+
+    fun getUser(): LoginUserData{
+        return this.user
     }
 
     private suspend fun insert(data: LoginUserData) {
@@ -253,7 +275,7 @@ class LoginViewModel(
         _loginFailSnackbarEvent.value = true
     }
     fun onTestRedirect(){
-        _registerFailSnackbarEvent.value = true
+        _directToMainEvent.value = true
     }
     fun onUsingCamera(){
         _useCameraEvent.value = _useCameraEvent.value != true
