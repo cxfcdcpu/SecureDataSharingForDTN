@@ -3,7 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.securedatasharingfordtn.mainbody.MainFragment">
-
+    <data>
+        <variable
+            name="MainViewModel"
+            type="com.example.securedatasharingfordtn.mainbody.MainViewModel"/>
+    </data>
 <ScrollView
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -30,6 +34,7 @@
             android:id="@+id/imageView2"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:onClick="@{() -> MainViewModel.onDirectToConnection()}"
             app:layout_constraintDimensionRatio="w,1:1"
             app:layout_constraintEnd_toStartOf="@+id/imageView4"
             app:layout_constraintHorizontal_bias="0.5"

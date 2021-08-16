@@ -183,7 +183,6 @@ class LoginViewModel(
 
             if(response.status.value==200){
                 keys = response.readBytes()
-
                 _setupOKEvent.value=true
             }else{
                 _registerFailSnackbarEvent.value=true

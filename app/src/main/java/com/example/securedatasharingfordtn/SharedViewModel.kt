@@ -36,6 +36,18 @@ class SharedViewModel : ViewModel(){
                 +publickeySize+", pivateKey size is: "+ privatekeySize)
     }
 
+    fun getPairing():Pairing{
+        return pairing
+    }
+
+    fun getPublicKey():PublicKey{
+        return publicKey
+    }
+
+    fun getPrivateKey():PrivateKey{
+        return privateKey
+    }
+
 
 
 }

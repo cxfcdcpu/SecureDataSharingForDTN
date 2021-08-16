@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ImageActivity">
+    tools:context=".connection.ImageActivity">
 
     <TableLayout
         android:id="@+id/image_activity_from_main"
