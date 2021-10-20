@@ -26,6 +26,7 @@ public class UserInfo {
         ret+= "userID: " + userID;
         return ret;
     }
+
     public String getExpirationDate() {
         return this.expirationDate;
     }

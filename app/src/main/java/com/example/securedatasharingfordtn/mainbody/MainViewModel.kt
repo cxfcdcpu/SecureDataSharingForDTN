@@ -62,12 +62,26 @@ class MainViewModel(
     private var _directToConnectionEvent = MutableLiveData<Boolean>()
     val directToMainEvent: LiveData<Boolean>
         get() = _directToConnectionEvent
+
+    private var _manageMembers = MutableLiveData<Boolean>()
+    val manageMembers: LiveData<Boolean>
+        get() = _manageMembers
+
+
     //login error snackbar indicator functions
     fun doneDirectToConnectionEvent(){
         _directToConnectionEvent.value = false
     }
     fun onDirectToConnection(){
         _directToConnectionEvent.value = true
+    }
+
+    fun setupRevocation(){
+        _manageMembers.value = true
+    }
+
+    fun doneSetupRevocationEvent(){
+        _manageMembers.value = false
     }
 
 

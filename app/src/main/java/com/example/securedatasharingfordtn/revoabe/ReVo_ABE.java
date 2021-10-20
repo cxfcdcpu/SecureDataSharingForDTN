@@ -146,7 +146,7 @@ public class ReVo_ABE {
 			u.add(rand);
 		}
 		//shared secret
-		Element s = u.get(0);
+		Element s = u.get(0).getImmutable();
 		Element r = this.group.getZr().newRandomElement().getImmutable();
 		Element C_prime = pk.g2_beta.powZn(s).getImmutable();
 		Element D = pk.g2.powZn(r).getImmutable();
@@ -193,7 +193,7 @@ public class ReVo_ABE {
 			u.add(rand);
 		}
 		//shared secret
-		Element s = u.get(0);
+		Element s = u.get(0).getImmutable();
 		Element r = pair.getZr().newRandomElement().getImmutable();
 		Element C_prime = pk.g2_beta.powZn(s).getImmutable();
 		Element D = pk.g2.powZn(r).getImmutable();
@@ -222,7 +222,7 @@ public class ReVo_ABE {
 		Element seed = pair.getGT().newRandomElement().getImmutable();
 		Element C = (pk.e_gg_alpha.powZn(s)).mul(seed).getImmutable();
 		byte[] aes_ci = AES.encrypt(msg, seed.toBytes());
-		
+		System.out.println("encryption done, seed: "+seed.toString());
 		return new Ciphertext(policy, C, C_prime, D, C_y, C_i,aes_ci,policyString );
 	}
 	
@@ -237,18 +237,24 @@ public class ReVo_ABE {
 		HashMap<Integer, Element> Ky = (HashMap<Integer, Element>) key.k_y.clone();
 		Set<Integer> common_y_i = Ky.keySet();
 		if (!common_y_i.retainAll(ctxt.C_y.keySet())) {
-			System.out.println("This user is in the revocation list.");
-			return null;
+			//System.out.println("This user is in the revocation list.");
+
+			return "This user is in the revocation list.".getBytes();
+		}
+		if (common_y_i.toArray().length==0) {
+			return "This user is in the revocation list.".getBytes();
 		}
 		int y_i = (int) common_y_i.toArray()[0];
 		
 		Element P = this.group.pairing(key.k_y.get(y_i), ctxt.C_prime).getImmutable();
 		Element Q = this.group.pairing(ctxt.C_y.get(y_i), pk.g2).getImmutable();
-		
+		if(key.attr_list==null || key.attr_list.size()==0) {
+			return "attributes not exists".getBytes();
+		}
 		List<BinNode> nodes = MSP_Builder.prune(ctxt.policy, key.attr_list);
 		if (nodes == null) {
-			System.out.println("Policy not satisfied.");
-			return null;
+			//System.out.println("Policy not satisfied.");
+			return "Policy not satisfied.".getBytes();
 		}
 		
 		Element prodC_i = null;
@@ -258,19 +264,17 @@ public class ReVo_ABE {
 			String attr= node.getAttributeAndIndex();
 			String attr_stripped = MSP_Builder.strip_index(attr);
 			//System.out.println(attr);
-			if(prodC_i==null)prodC_i = ctxt.C_i.get(attr);
+			if(prodC_i==null)prodC_i = ctxt.C_i.get(attr).getImmutable();
 			else
-				prodC_i = prodC_i.mul(ctxt.C_i.get(attr));
+				prodC_i = prodC_i.mul(ctxt.C_i.get(attr)).getImmutable();
 			
-			if(prodK_i==null)prodK_i = key.k_i.get(attr_stripped);
+			if(prodK_i==null)prodK_i = key.k_i.get(attr_stripped).getImmutable();
 			else
-				prodK_i = prodK_i.mul(key.k_i.get(attr_stripped));
+				prodK_i = prodK_i.mul(key.k_i.get(attr_stripped)).getImmutable();
 		}
 		
-		Element W = P.div((Q.mul(this.group.pairing(prodC_i, key.L)).mul(this.group.pairing(prodK_i, ctxt.D))));
-		Element seed = ctxt.C.div(W);
-		
-		
+		Element W = P.div((Q.mul(this.group.pairing(prodC_i, key.L)).mul(this.group.pairing(prodK_i, ctxt.D)))).getImmutable();
+		Element seed = ctxt.C.div(W).getImmutable();
 		
 		return AES.decrypt(ctxt.ciphertext, seed.toBytes());
 	}
@@ -279,20 +283,26 @@ public class ReVo_ABE {
 		HashMap<Integer, Element> Ky = (HashMap<Integer, Element>) key.k_y.clone();
 		Set<Integer> common_y_i = Ky.keySet();
 		if (!common_y_i.retainAll(ctxt.C_y.keySet())) {
-			System.out.println("This user is in the revocation list.");
-			return null;
+			//System.out.println("This user is in the revocation list.");
+
+			return "This user is in the revocation list.".getBytes();
+		}
+		if (common_y_i.toArray().length==0) {
+			return "This user is in the revocation list.".getBytes();
 		}
 		int y_i = (int) common_y_i.toArray()[0];
 		
 		Element P = pair.pairing(key.k_y.get(y_i), ctxt.C_prime).getImmutable();
 		Element Q = pair.pairing(ctxt.C_y.get(y_i), pk.g2).getImmutable();
-		
+
+		if(key.attr_list==null || key.attr_list.size()==0) {
+			return "attributes not exists".getBytes();
+		}
 		List<BinNode> nodes = MSP_Builder.prune(ctxt.policy, key.attr_list);
 		if (nodes == null) {
-			System.out.println("Policy not satisfied.");
-			return null;
+			//System.out.println("Policy not satisfied.");
+			return "Policy not satisfied.".getBytes();
 		}
-		
 		Element prodC_i = null;
 		Element prodK_i = null;
 		
@@ -300,20 +310,20 @@ public class ReVo_ABE {
 			String attr= node.getAttributeAndIndex();
 			String attr_stripped = MSP_Builder.strip_index(attr);
 			//System.out.println(attr);
-			if(prodC_i==null)prodC_i = ctxt.C_i.get(attr);
+			if(prodC_i==null)prodC_i = ctxt.C_i.get(attr).getImmutable();
 			else
-				prodC_i = prodC_i.mul(ctxt.C_i.get(attr));
+				prodC_i = prodC_i.mul(ctxt.C_i.get(attr)).getImmutable();
 			
-			if(prodK_i==null)prodK_i = key.k_i.get(attr_stripped);
+			if(prodK_i==null)prodK_i = key.k_i.get(attr_stripped).getImmutable();
 			else
-				prodK_i = prodK_i.mul(key.k_i.get(attr_stripped));
+				prodK_i = prodK_i.mul(key.k_i.get(attr_stripped)).getImmutable();
 		}
 		
-		Element W = P.div((Q.mul(pair.pairing(prodC_i, key.L)).mul(pair.pairing(prodK_i, ctxt.D))));
-		Element seed = ctxt.C.div(W);
+		Element W = P.div((Q.mul(pair.pairing(prodC_i, key.L)).mul(pair.pairing(prodK_i, ctxt.D)))).getImmutable();
+		Element seed = ctxt.C.div(W).getImmutable();
 		
 		
-		System.out.println("To the last step of decrypt for Revo_abe");
+		System.out.println("To the last step of decrypt for Revo_abe, seed: "+seed.toString());
 		return AES.decrypt(ctxt.ciphertext, seed.toBytes());
 	}
 	

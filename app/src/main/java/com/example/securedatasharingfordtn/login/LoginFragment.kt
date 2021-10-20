@@ -2,6 +2,7 @@ package com.example.securedatasharingfordtn.login
 
 import android.Manifest
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.text.method.HideReturnsTransformationMethod
@@ -24,6 +25,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import com.budiyev.android.codescanner.*
+import com.example.securedatasharingfordtn.Preferences
 import com.example.securedatasharingfordtn.R
 import com.example.securedatasharingfordtn.SharedViewModel
 import com.example.securedatasharingfordtn.database.DTNDataSharingDatabase
@@ -47,6 +49,7 @@ class LoginFragment : Fragment()  {
     private lateinit var outputDirectory: File
     private lateinit var broadcastManager: LocalBroadcastManager
     private lateinit var binding: FragmentLoginBinding
+    private lateinit var preferences: Preferences
     private var displayId: Int = -1
     private var lensFacing: Int = CameraSelector.LENS_FACING_BACK
     private var preview: Preview? = null
@@ -69,17 +72,24 @@ class LoginFragment : Fragment()  {
         binding = DataBindingUtil.inflate(
             inflater, R.layout.fragment_login,container,false
         )
+
+
         val application = requireNotNull(this.activity).application
 
         val dataSource = DTNDataSharingDatabase.getInstance(application).dataSharingDatabaseDao
 
         val viewModelFactory = LoginViewModelFactory(dataSource, application)
-        var sharedModel=ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
+        val sharedModel=ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
         val loginViewModel = ViewModelProvider(
             this,viewModelFactory).get(LoginViewModel::class.java)
         viewFinder = CodeScanner(requireContext(), binding.viewFinder)
         binding.loginViewModel = loginViewModel
         binding.lifecycleOwner = this
+
+        preferences = Preferences(requireContext())
+
+
+
         //prevent tab change after rotate the screen
         subscribeTab(binding,loginViewModel)
         observeTabSelection(binding,loginViewModel)
@@ -166,8 +176,6 @@ class LoginFragment : Fragment()  {
                     getString(R.string.snackbar_test_text)+loginViewModel.lastLoginTime.value.toString(),
                     Snackbar.LENGTH_SHORT // How long to display the message.
                 ).show()
-                // Reset state to make sure the snackbar is only shown once, even if the device
-                // has a configuration change.
                 loginViewModel.doneShowingLoginSnackbar()
             }
         })
@@ -181,8 +189,6 @@ class LoginFragment : Fragment()  {
                     "Setup user account fail.",
                     Snackbar.LENGTH_SHORT // How long to display the message.
                 ).show()
-                // Reset state to make sure the snackbar is only shown once, even if the device
-                // has a configuration change.
                 loginViewModel.doneShowingRegisterSnackbar()
             }
         })
@@ -198,8 +204,6 @@ class LoginFragment : Fragment()  {
                             +this.hardcodedCurveFileDir(),
                     Snackbar.LENGTH_SHORT // How long to display the message.
                 ).show()
-                // Reset state to make sure the snackbar is only shown once, even if the device
-                // has a configuration change.
                 loginViewModel.doneSetupOKSnackbar()
 
             }
@@ -212,6 +216,7 @@ class LoginFragment : Fragment()  {
             if (it == true) { // Observed state is true.
                 sharedModel.bootstrap(hardcodedCurveFileDir(),loginViewModel.getUser())
                 loginViewModel.doneDirectToMainEvent()
+                preferences.setMembers(loginViewModel.members)
                 view?.findNavController()?.navigate(R.id.action_loginFragment_to_mainFragment)
 
             }
@@ -279,32 +284,6 @@ class LoginFragment : Fragment()  {
         }
     }
 
-    private fun takePhoto() {}
-
-//    private fun startCamera() {
-//        val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
-//        cameraProviderFuture.addListener(Runnable {
-//
-//            // CameraProvider
-//            cameraProvider = cameraProviderFuture.get()
-//
-//            // Select lensFacing depending on the available cameras
-//            lensFacing = when {
-//                hasBackCamera() -> CameraSelector.LENS_FACING_BACK
-//                hasFrontCamera() -> CameraSelector.LENS_FACING_FRONT
-//                else -> throw IllegalStateException("Back and front camera are unavailable")
-//            }
-//
-//            // Enable or disable switching between cameras
-//            //updateCameraSwitchButton()
-//
-//            // Build and bind the camera use cases
-//            bindCameraUseCases()
-//            viewFinder.visibility=View.VISIBLE
-//        }, ContextCompat.getMainExecutor(requireContext()))
-//
-//    }
-
 
     private fun startCamera(){
 
@@ -341,70 +320,6 @@ class LoginFragment : Fragment()  {
 
 
 
-
-
-    /** Declare and bind preview, capture and analysis use cases */
-//    private fun bindCameraUseCases() {
-//
-//
-//        val rotation = viewFinder.display.rotation
-//
-//        // CameraProvider
-//        val cameraProvider = cameraProvider
-//            ?: throw IllegalStateException("Camera initialization failed.")
-//
-//        // CameraSelector
-//        val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
-//
-//        // Preview
-//        preview = Preview.Builder()
-//            // We request aspect ratio but no resolution
-//            .setTargetAspectRatio(AspectRatio.RATIO_4_3)
-//            // Set initial target rotation
-//            .setTargetRotation(rotation)
-//            .build()
-//
-//        // ImageCapture
-//        imageCapture = ImageCapture.Builder()
-//            .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-//            // We request aspect ratio but no resolution to match preview config, but letting
-//            // CameraX optimize for whatever specific resolution best fits our use cases
-//            .setTargetAspectRatio(AspectRatio.RATIO_4_3)
-//            // Set initial target rotation, we will have to call this again if rotation changes
-//            // during the lifecycle of this use case
-//            .setTargetRotation(rotation)
-//            .build()
-//
-//
-//
-//        // Must unbind the use-cases before rebinding them
-//        cameraProvider.unbindAll()
-//
-//        try {
-//            // A variable number of use-cases can be passed here -
-//            // camera provides access to CameraControl & CameraInfo
-//            camera = cameraProvider.bindToLifecycle(
-//                this, cameraSelector, preview, imageCapture)
-//
-//            // Attach the viewfinder's surface provider to preview use case
-//            preview?.setSurfaceProvider(viewFinder.surfaceProvider)
-//        } catch (exc: Exception) {
-//            Log.e(TAG, "Use case binding failed", exc)
-//        }
-//    }
-
-//
-//    /** Returns true if the device has an available back camera. False otherwise */
-//    private fun hasBackCamera(): Boolean {
-//        return cameraProvider?.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA) ?: false
-//    }
-//
-//    /** Returns true if the device has an available front camera. False otherwise */
-//    private fun hasFrontCamera(): Boolean {
-//        return cameraProvider?.hasCamera(CameraSelector.DEFAULT_FRONT_CAMERA) ?: false
-//    }
-//
-//
     companion object {
         private const val TAG = "CameraXBasic"
         private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"

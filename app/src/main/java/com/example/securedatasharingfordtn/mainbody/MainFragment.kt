@@ -1,5 +1,6 @@
 package com.example.securedatasharingfordtn.mainbody
 
+import android.content.Intent
 import android.os.Bundle
 import android.telecom.ConnectionService
 import android.util.Log
@@ -49,6 +50,7 @@ class MainFragment : Fragment(){
         binding.lifecycleOwner = this
 
         observeDirectToMainEvent(mainViewModel)
+        startManageMembersActivity(mainViewModel)
         return binding.root
     }
 
@@ -63,4 +65,19 @@ class MainFragment : Fragment(){
             }
         })
     }
+
+    private fun startManageMembersActivity(mainViewModel: MainViewModel){
+        mainViewModel.manageMembers.observe(viewLifecycleOwner,{
+            if (it == true) {
+                Log.i("mainbody", "To manage members.")
+                mainViewModel.doneSetupRevocationEvent()
+                val intent = Intent(requireContext(), MembersActivity::class.java)
+                startActivity(intent)
+            }
+        })
+    }
+
+
+
+
 }

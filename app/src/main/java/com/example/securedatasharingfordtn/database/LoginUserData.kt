@@ -35,8 +35,15 @@ data class LoginUserData(
     @ColumnInfo(name = "user_expiration_time")
     var expirationDate: Long = 0L,
 
+    @ColumnInfo(name = "members")
+    var members: String="",
+
     @ColumnInfo(name = "keys")
     var keys: ByteArray = byteArrayOf()
+
+
+
+
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

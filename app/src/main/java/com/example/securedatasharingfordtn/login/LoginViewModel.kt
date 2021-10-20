@@ -11,6 +11,7 @@ import com.example.securedatasharingfordtn.HelperFunctions
 import com.example.securedatasharingfordtn.database.DTNDataSharingDatabaseDao
 import com.example.securedatasharingfordtn.database.EntityHelper
 import com.example.securedatasharingfordtn.database.LoginUserData
+import com.example.securedatasharingfordtn.http.KtorHttpClient
 import com.example.securedatasharingfordtn.revoabe.PrivateKey
 import com.example.securedatasharingfordtn.revoabe.PublicKey
 import com.example.securedatasharingfordtn.revoabe.ReVo_ABE
@@ -41,16 +42,10 @@ class LoginViewModel(
     application: Application): AndroidViewModel(application) {
 
     private var keys: ByteArray = byteArrayOf()
+    var members: String = ""
     private lateinit var user: LoginUserData
-    val client = HttpClient(Android) {
-        engine {
-            connectTimeout = 100_000
-            socketTimeout = 100_000
-        }
-        install(JsonFeature){
-            serializer = GsonSerializer()
-        }
-    }
+
+    val client = KtorHttpClient.KtorClient
 
     //asyncronized job for database
     private var viewModelJob = Job()
@@ -177,7 +172,7 @@ class LoginViewModel(
 
         uiScope.
         launch {
-            val response: HttpResponse = client.post("http://131.151.90.204:8081/ReVo_webtest/Bootstrap"){
+            val response: HttpResponse = client.post(KtorHttpClient.BASE_URL+KtorHttpClient.APIName+"Bootstrap"){
                 body = "{\"username\": \"${username.value}\",\"password\": \"${password.value}\",\"missionCode\":\"${missionCode.value}\"}"
             }
 
@@ -187,9 +182,9 @@ class LoginViewModel(
             }else{
                 _registerFailSnackbarEvent.value=true
             }
+
+
         }
-
-
     }
 
     private suspend fun fetchUserFromServer(){
@@ -198,10 +193,20 @@ class LoginViewModel(
         runBlocking {
             launch {
                 val response: HttpResponse =
-                    client.post("http://131.151.90.204:8081/ReVo_webtest/SearchUser") {
+                    client.post(KtorHttpClient.BASE_URL+KtorHttpClient.APIName+"SearchUser") {
                         body =
                             "{\"username\": \"${username.value}\", \"password\": \"${password.value}\"}"
                     }
+
+                val response2: HttpResponse = client.post(KtorHttpClient.BASE_URL+KtorHttpClient.APIName+"GetUsersStringOfAMission"){
+                    body = "{\"missionCode\":\"${missionCode.value}\"}"
+                }
+
+                if(response2.status.value==200){
+                    members = response2.readText()
+                }else{
+                    _registerFailSnackbarEvent.value=true
+                }
 
                 if (response.status.value == 200) {
                     val userInfo: UserInfo = response.receive()
@@ -217,6 +222,7 @@ class LoginViewModel(
                             recentLoginTimeMilli = System.currentTimeMillis(),
                             registerationTime = rt,
                             expirationDate = et,
+                            members = members,
                             keys = keys
                         )
                         Log.i("Login", "Private user: " + userInfo.string)

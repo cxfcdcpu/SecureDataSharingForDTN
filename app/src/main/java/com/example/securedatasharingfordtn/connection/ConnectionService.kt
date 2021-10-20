@@ -11,16 +11,27 @@ import android.widget.Toast
 import androidx.collection.SimpleArrayMap
 import androidx.core.net.toUri
 import com.example.securedatasharingfordtn.revoabe.Ciphertext
+import com.example.securedatasharingfordtn.revoabe.PrivateKey
+import com.example.securedatasharingfordtn.revoabe.PublicKey
 import com.google.android.gms.common.util.IOUtils.copyStream
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.*
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
+import it.unisa.dia.gas.jpbc.Pairing
+import it.unisa.dia.gas.plaf.jpbc.pairing.PairingFactory
+import it.unisa.dia.gas.plaf.jpbc.util.Arrays
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
+import android.content.Intent.getIntent
+
+import android.os.Bundle
+import com.example.securedatasharingfordtn.revoabe.ReVo_ABE
 
 
 /***check service condition on force stop***/
@@ -48,6 +59,9 @@ class ConnectionService : Service() {
     private val incomingFilePayloads = SimpleArrayMap<Long, Payload>()
     private val completedFilePayloads = SimpleArrayMap<Long, Payload>()
     private val filePayloadFilenames = SimpleArrayMap<Long, String>()
+    lateinit var privateKey: PrivateKey
+    lateinit var publicKey: PublicKey
+    lateinit var pairing: Pairing
 
 
     interface ServiceCallbacks {
@@ -65,8 +79,23 @@ class ConnectionService : Service() {
     }
 
     override fun onBind(intent: Intent): IBinder {
-        //TODO("Return the communication channel to the service.")
+        val bundle = intent.extras
+        val keys = bundle!!.getByteArray("keys")
+        val pairingDir = bundle.getString("pairingDir")
+        if (keys !=null && pairingDir != null)
+            bootstrap(pairingDir,keys)
+
         return conServiceBinder
+    }
+    private fun bootstrap(dirForPairingFile : String, keys: ByteArray){
+
+        this.pairing = PairingFactory.getPairing(dirForPairingFile)
+        val publickeySize = ByteBuffer.wrap(keys,0,4).order(ByteOrder.nativeOrder()).getInt()
+        val privatekeySize = ByteBuffer.wrap(keys,publickeySize+4,4).order(ByteOrder.nativeOrder()).getInt()
+        this.publicKey = PublicKey(Arrays.copyOfRange(keys,4,publickeySize+4),this.pairing)
+        this.privateKey = PrivateKey(Arrays.copyOfRange(keys,8+publickeySize,8+publickeySize+privatekeySize),this.pairing)
+        Log.i("bootstrap",publicKey.getString()+privateKey.getString())
+
     }
 
     override fun onCreate() {
@@ -205,11 +234,14 @@ class ConnectionService : Service() {
 //        val payload = Payload.fromBytes(bytes)
 //        Nearby.getConnectionsClient(applicationContext).sendPayload(endpointId, payload)
 //    }
+    fun ByteArray.toHex(): String = joinToString(separator = "") { eachByte -> "%02x".format(eachByte) }
 
     private fun sendPayload(endpointId: String) {
         if (textMsg != null) {
 
             val filenamePayload = Payload.fromBytes(encrypteFilename!!.toByteArray())
+
+            Log.i("Cipher",encrypteFilename!!.toByteArray().toHex() )
             Nearby.getConnectionsClient(context).sendPayload(endpointId, filenamePayload)
             textMsg = null
         }
@@ -227,7 +259,9 @@ class ConnectionService : Service() {
             Log.d(TAG, "Payload Received")
             when (payload.type) {
                 Payload.Type.BYTES -> {
-                    rcvdFilename = String(payload.asBytes()!!, StandardCharsets.UTF_8)
+                    Log.i("Cipher",Ciphertext(payload.asBytes()!!,pairing).toByteArray().toHex() )
+                    publicKey.printPublicKey()
+                    rcvdFilename = String(ReVo_ABE.decrypt(pairing,publicKey,Ciphertext(payload.asBytes()!!,pairing),privateKey) )
                 }
                 Payload.Type.FILE -> {
                     // Add this to our tracking map, so that we can retrieve the payload later.

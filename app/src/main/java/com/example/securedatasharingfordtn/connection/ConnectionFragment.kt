@@ -8,6 +8,7 @@ import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -18,6 +19,8 @@ import android.widget.Switch
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
+import com.example.securedatasharingfordtn.SharedViewModel
 import com.example.securedatasharingfordtn.databinding.FragmentConnectionBinding
 
 import kotlinx.android.synthetic.main.fragment_connection.*
@@ -33,10 +36,10 @@ class ConnectionFragment : Fragment() {
     lateinit var switchConActButton: Button
     lateinit var switchImgActButton: Button
     private lateinit var binding: FragmentConnectionBinding
-
+    lateinit var sharedModel: SharedViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        sharedModel= ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
         checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_PERMISSION_CODE)
 
 
@@ -60,7 +63,10 @@ class ConnectionFragment : Fragment() {
 
     /** Called when the user taps the "Connected Device" button  */
     private fun switchConAct() {
+        Log.i("connectionFragment","key byte array size: "+sharedModel.getKeys().size)
         val con_act_intent = Intent(requireContext(), ConnectionActivity::class.java)
+        con_act_intent.putExtra("keys", sharedModel.getKeys());
+        con_act_intent.putExtra("pairingDir", sharedModel.getPairDir());
         startActivity(con_act_intent)
     }
 
@@ -78,6 +84,8 @@ class ConnectionFragment : Fragment() {
             //conServiceIntent = Intent(this, ConnectionService::class.java)
             //startService(conServiceIntent)
             Intent(requireContext(), ConnectionService::class.java).also { intent ->
+                intent.putExtra("keys", sharedModel.getKeys());
+                intent.putExtra("pairingDir", sharedModel.getPairDir());
                 requireActivity().bindService(intent, connectionS, Context.BIND_AUTO_CREATE)
             }
             switchConActButton.isEnabled = true

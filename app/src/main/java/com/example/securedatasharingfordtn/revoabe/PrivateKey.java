@@ -50,7 +50,7 @@ public class PrivateKey {
 		bf = ByteBuffer.wrap(prikBytes, end_attrSize, 4).order(ByteOrder.nativeOrder());
 		int start_kis = end_attrSize+4;
 		int end_kis = start_kis + bf.getInt();
-		this.L = pair.getG2().newElementFromBytes(Arrays.copyOfRange(prikBytes, start_l, end_l));
+		this.L = pair.getG2().newElementFromBytes(Arrays.copyOfRange(prikBytes, start_l, end_l)).getImmutable();
 		this.attr_list = EntityHelper.bytes_to_stringList(Arrays.copyOfRange(prikBytes, start_attr, end_attr));
 		List<String> attrSize = EntityHelper.bytes_to_stringList(Arrays.copyOfRange(prikBytes, start_attrSize, end_attrSize));
 		this.k_i = bytesToKis(this.attr_list,attrSize,Arrays.copyOfRange(prikBytes, start_kis, end_kis),pair);
@@ -78,7 +78,7 @@ public class PrivateKey {
 			int curSize = Integer.parseInt(attrSizes.get(counter));
 			counter++;
 			Element curElement = pair.getG1().newElementFromBytes(
-					Arrays.copyOfRange(kisBytes, startPosition, startPosition+curSize));
+					Arrays.copyOfRange(kisBytes, startPosition, startPosition+curSize)).getImmutable();
 			ret.put(attr, curElement);
 			startPosition+=curSize;
 		}
@@ -95,7 +95,7 @@ public class PrivateKey {
 			int curSize = Integer.parseInt(nodeSizes.get(counter));
 			counter++;
 			Element curElement = pair.getG1().newElementFromBytes(
-					Arrays.copyOfRange(kysBytes, startPosition, startPosition+curSize));
+					Arrays.copyOfRange(kysBytes, startPosition, startPosition+curSize)).getImmutable();
 			ret.put(nodeID, curElement);
 			startPosition+=curSize;
 		}
@@ -110,6 +110,15 @@ public class PrivateKey {
 		System.out.println("L: "+L.toString());
 		System.out.println("K_i: "+k_i.toString());
 		System.out.println("K_y: "+k_y.toString());
+	}
+
+	public String getString() {
+		String ret = "";
+		ret+= "attribute list: "+attr_list.toString()+"\n";
+		ret+= "L: "+L.toString()+"\n";
+		ret+= "K_i: "+k_i.toString()+"\n";
+		ret+= "K_y: "+k_y.toString()+"\n";
+		return ret;
 	}
 	
 	public List<String> getAttributes() {
