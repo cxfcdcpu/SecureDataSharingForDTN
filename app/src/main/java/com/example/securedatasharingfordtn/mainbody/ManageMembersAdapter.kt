@@ -42,13 +42,17 @@ class MemberViewHolder(private val binding: ItemRevoBinding, private val prefere
 
     fun bindTo(member: Member){
         binding.MemberName.text = member.name
+        val curSet = preferences.getRevokedMembers()
+        if (curSet.contains(member.id.toString())){
+            binding.switch2.isChecked = true
+        }
         binding.switch2.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                var newSet = preferences.getRevokedMembers()
+                val newSet = preferences.getRevokedMembers()
                 newSet.add(member.id.toString())
                 preferences.setRevokedMembers(newSet)
             } else {
-                var newSet = preferences.getRevokedMembers()
+                val newSet = preferences.getRevokedMembers()
                 newSet.remove(member.id.toString())
                 preferences.setRevokedMembers(newSet)
             }

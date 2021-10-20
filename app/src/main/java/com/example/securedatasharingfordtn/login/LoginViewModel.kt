@@ -150,12 +150,13 @@ class LoginViewModel(
         runBlocking {
             val tryUser = tryLogin() //database.tryLogin(username.value!!,password.value!!)
 
-            //TO-DO, add user with none expired date.
+            //add user with none expired date.
             if(tryUser!=null && (true || tryUser.expirationDate > System.currentTimeMillis())){
                 runBlocking {
                     tryUser.recentLoginTimeMilli = System.currentTimeMillis()
                     update(tryUser)
                     user = tryUser
+                    members = user.members
                 }
 
                 Log.i("Login", "find user in the database")
