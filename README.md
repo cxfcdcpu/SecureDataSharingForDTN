@@ -53,6 +53,8 @@
   Enjoy. If you got any question let me know. 
   
   
-  
+## APP architecture
+
+  The App architecture is in the report files in the repository.
   
   
