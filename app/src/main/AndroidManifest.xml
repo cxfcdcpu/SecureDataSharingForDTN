@@ -50,8 +50,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".connection.SelectedImageActivity" />
 
+        <activity android:name=".connection.SelectedImageActivity" />
+        <activity android:name=".connection.ShudipActivity" />
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.example.securedatasharingfordtn.fileprovider"

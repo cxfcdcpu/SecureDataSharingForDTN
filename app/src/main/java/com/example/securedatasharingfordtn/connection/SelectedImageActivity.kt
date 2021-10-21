@@ -1,5 +1,4 @@
 package com.example.securedatasharingfordtn.connection
-
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

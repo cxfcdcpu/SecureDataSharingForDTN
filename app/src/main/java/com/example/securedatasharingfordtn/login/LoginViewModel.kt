@@ -145,7 +145,7 @@ class LoginViewModel(
     //database query functions
     fun tryLoginEvent() {
 
-        Log.i("Login", "before Login:" + username.value+ " " +password.value)
+        Log.i("Login", "before Login:" + username.value!!.trim()+ " " +password.value)
 
         runBlocking {
             val tryUser = tryLogin() //database.tryLogin(username.value!!,password.value!!)
@@ -174,7 +174,7 @@ class LoginViewModel(
         uiScope.
         launch {
             val response: HttpResponse = client.post(KtorHttpClient.BASE_URL+KtorHttpClient.APIName+"Bootstrap"){
-                body = "{\"username\": \"${username.value}\",\"password\": \"${password.value}\",\"missionCode\":\"${missionCode.value}\"}"
+                body = "{\"username\": \"${username.value!!.trim()}\",\"password\": \"${password.value}\",\"missionCode\":\"${missionCode.value}\"}"
             }
 
             if(response.status.value==200){
@@ -196,7 +196,7 @@ class LoginViewModel(
                 val response: HttpResponse =
                     client.post(KtorHttpClient.BASE_URL+KtorHttpClient.APIName+"SearchUser") {
                         body =
-                            "{\"username\": \"${username.value}\", \"password\": \"${password.value}\"}"
+                            "{\"username\": \"${username.value!!.trim()}\", \"password\": \"${password.value}\"}"
                     }
 
                 val response2: HttpResponse = client.post(KtorHttpClient.BASE_URL+KtorHttpClient.APIName+"GetUsersStringOfAMission"){
@@ -238,7 +238,7 @@ class LoginViewModel(
 
     private suspend fun tryLogin(): LoginUserData?{
         return withContext(Dispatchers.IO){
-            val tryUser = database.tryLogin(username.value!!,password.value!!)
+            val tryUser = database.tryLogin(username.value!!.trim(),password.value!!)
             tryUser
         }
     }

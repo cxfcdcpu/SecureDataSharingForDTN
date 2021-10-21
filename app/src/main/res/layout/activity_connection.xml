@@ -23,23 +23,11 @@
         <EditText
             android:id="@+id/editTextPolicy"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="55dp"
             android:ems="10"
-            android:inputType="text" />
+            android:inputType="text"
+            tools:ignore="SpeakableTextPresentCheck" />
 
-        <TextView
-            android:id="@+id/textView6"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="RevokedList"
-            tools:text="RevokedList" />
-
-        <EditText
-            android:id="@+id/editTextRL"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="text" />
 
         <Button
             android:id="@+id/back_connection_activity"

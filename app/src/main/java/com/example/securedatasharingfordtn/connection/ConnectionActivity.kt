@@ -1,5 +1,4 @@
 package com.example.securedatasharingfordtn.connection
-
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -12,9 +11,11 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import com.example.securedatasharingfordtn.Preferences
 import com.example.securedatasharingfordtn.R
 import com.example.securedatasharingfordtn.SharedViewModel
 import com.example.securedatasharingfordtn.database.LoginUserData
+import com.example.securedatasharingfordtn.revoabe.Ciphertext
 import com.example.securedatasharingfordtn.revoabe.PrivateKey
 import com.example.securedatasharingfordtn.revoabe.PublicKey
 import com.example.securedatasharingfordtn.revoabe.ReVo_ABE
@@ -24,7 +25,6 @@ import it.unisa.dia.gas.plaf.jpbc.util.Arrays
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-
 
 class ConnectionActivity : AppCompatActivity(), ConnectionService.ServiceCallbacks {
 
@@ -41,16 +41,15 @@ class ConnectionActivity : AppCompatActivity(), ConnectionService.ServiceCallbac
     lateinit var adapter: ArrayAdapter<String>
     lateinit var listview: ListView
     var listElementsArrayList: ArrayList<String> = ArrayList()
-    lateinit var sharedModel:SharedViewModel
-
+    lateinit var preferences:Preferences
     lateinit var privateKey: PrivateKey
     lateinit var publicKey: PublicKey
     lateinit var pairing: Pairing
-
-
+    lateinit var policyText: EditText
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_connection)
+        preferences = Preferences(this)
         val bundle = intent.extras
         val keys = bundle!!.getByteArray("keys")
         val pairingDir = bundle.getString("pairingDir")
@@ -61,18 +60,27 @@ class ConnectionActivity : AppCompatActivity(), ConnectionService.ServiceCallbac
         backConActButton.setOnClickListener {
             backConAct()
         }
-        sharedModel= ViewModelProvider(this).get(SharedViewModel::class.java)
+        policyText = findViewById(R.id.editTextPolicy)
+        policyText.setText(preferences.getPolicy())
         //declare the connected devices listview
         listview = findViewById(R.id.connection_list)
         adapter = ArrayAdapter(this,android.R.layout.simple_expandable_list_item_1,listElementsArrayList)
         listview.adapter = adapter
         listview.onItemClickListener = object : AdapterView.OnItemClickListener {
             override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                preferences.setPolicy(policyText.text.toString())
                 switchImgAct(position)
             }
         }
     }
+    private fun bootstrap(dirForPairingFile : String, keys: ByteArray){
 
+        this.pairing = PairingFactory.getPairing(dirForPairingFile)
+        val publickeySize = ByteBuffer.wrap(keys,0,4).order(ByteOrder.nativeOrder()).getInt()
+        val privatekeySize = ByteBuffer.wrap(keys,publickeySize+4,4).order(ByteOrder.nativeOrder()).getInt()
+        this.publicKey = PublicKey(Arrays.copyOfRange(keys,4,publickeySize+4),this.pairing)
+        this.privateKey = PrivateKey(Arrays.copyOfRange(keys,8+publickeySize,8+publickeySize+privatekeySize),this.pairing)
+    }
     /** Called when the user taps the back button  */
     private fun backConAct() {
         finish()
@@ -124,16 +132,20 @@ class ConnectionActivity : AppCompatActivity(), ConnectionService.ServiceCallbac
         Toast.makeText(applicationContext, "Sending to $selectedEndPointName", Toast.LENGTH_LONG).show()
         conService.textMsg = fileName
         conService.imageMsg = photoFile
-        var RLText : EditText  =findViewById(R.id.editTextRL)
+
+
+        val RLStringList = preferences.getRevokedMembers().toList()
         var RL = listOf<Int>()
-        for(RLStr in RLText.text.toString().split(",")){
-            RL+= RLStr.toInt()
+        for(RLStr in RLStringList){
+            RL+= RLStr.toInt()+1
         }
         this.publicKey.printPublicKey()
         var policyText : EditText  =findViewById(R.id.editTextPolicy)
-        Log.i("encrypt", "policy: "+policyText.text.toString() + ", RL: "+RLText.text.toString())
-        conService.encrypteFilename = ReVo_ABE.encrypt(this.pairing
-                    ,this.publicKey,fileName.toByteArray(),policyText.text.toString(), RL)
+        Log.i("encrypt", "policy: "+policyText.text.toString() )
+        conService.encryptedFilename = ReVo_ABE.encrypt(this.pairing
+            ,this.publicKey,fileName.toByteArray(),policyText.text.toString(), RL)
+
+
 
         conService.setConnection(selectedEndPointName)
     }
@@ -153,15 +165,6 @@ class ConnectionActivity : AppCompatActivity(), ConnectionService.ServiceCallbac
             unbindService(connection)
             conServiceBound = false;
         }
-    }
-
-    private fun bootstrap(dirForPairingFile : String, keys: ByteArray){
-
-        this.pairing = PairingFactory.getPairing(dirForPairingFile)
-        val publickeySize = ByteBuffer.wrap(keys,0,4).order(ByteOrder.nativeOrder()).getInt()
-        val privatekeySize = ByteBuffer.wrap(keys,publickeySize+4,4).order(ByteOrder.nativeOrder()).getInt()
-        this.publicKey = PublicKey(Arrays.copyOfRange(keys,4,publickeySize+4),this.pairing)
-        this.privateKey = PrivateKey(Arrays.copyOfRange(keys,8+publickeySize,8+publickeySize+privatekeySize),this.pairing)
     }
 
 

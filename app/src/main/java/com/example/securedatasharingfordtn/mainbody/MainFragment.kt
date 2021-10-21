@@ -16,6 +16,7 @@ import androidx.navigation.findNavController
 import com.budiyev.android.codescanner.CodeScanner
 import com.example.securedatasharingfordtn.R
 import com.example.securedatasharingfordtn.SharedViewModel
+import com.example.securedatasharingfordtn.connection.ShudipActivity
 import com.example.securedatasharingfordtn.database.DTNDataSharingDatabase
 import com.example.securedatasharingfordtn.databinding.FragmentLoginBinding
 import com.example.securedatasharingfordtn.databinding.FragmentMainBinding
@@ -28,7 +29,7 @@ import java.io.InputStream
 class MainFragment : Fragment(){
 
     private lateinit var binding: FragmentMainBinding
-
+    private lateinit var sharedModel: SharedViewModel
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -43,7 +44,7 @@ class MainFragment : Fragment(){
         val dataSource = DTNDataSharingDatabase.getInstance(application).dataSharingDatabaseDao
 
         val viewModelFactory = MainViewModelFactory(dataSource, application)
-        var sharedModel=ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
+        sharedModel=ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
         val mainViewModel = ViewModelProvider(
             this,viewModelFactory).get(MainViewModel::class.java)
         binding.mainViewModel = mainViewModel
@@ -59,9 +60,12 @@ class MainFragment : Fragment(){
     private fun observeDirectToMainEvent(mainViewModel: MainViewModel){
         mainViewModel.directToMainEvent.observe(viewLifecycleOwner, Observer {
             if (it == true) { // Observed state is true.
-                Log.i("mainbody","is going to redirect to the connection fragment")
+                Log.i("mainbody","is going to redirect to the connection activity" + sharedModel.getPairDir())
                 mainViewModel.doneDirectToConnectionEvent()
-                view?.findNavController()?.navigate(R.id.action_mainFragment_to_connectionFragment)
+                val intent = Intent(requireContext(), ShudipActivity::class.java)
+                intent.putExtra("keys", sharedModel.getKeys());
+                intent.putExtra("pairingDir", sharedModel.getPairDir());
+                startActivity(intent)
             }
         })
     }

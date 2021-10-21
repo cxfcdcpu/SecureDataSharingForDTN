@@ -1,5 +1,4 @@
 package com.example.securedatasharingfordtn.connection
-
 import android.Manifest
 import android.content.ComponentName
 import android.content.Context
@@ -9,23 +8,17 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
-
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Switch
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
+import com.example.securedatasharingfordtn.R
 import com.example.securedatasharingfordtn.SharedViewModel
-import com.example.securedatasharingfordtn.databinding.FragmentConnectionBinding
 
-import kotlinx.android.synthetic.main.fragment_connection.*
-
-class ConnectionFragment : Fragment() {
+class ShudipActivity : AppCompatActivity() {
     companion object {
         private const val LOCATION_PERMISSION_CODE = 100
         private const val READ_PERMISSION_CODE = 101
@@ -35,18 +28,40 @@ class ConnectionFragment : Fragment() {
     private var conServiceBound: Boolean = false
     lateinit var switchConActButton: Button
     lateinit var switchImgActButton: Button
-    private lateinit var binding: FragmentConnectionBinding
-    lateinit var sharedModel: SharedViewModel
+    lateinit var sharedKeys: ByteArray
+    lateinit var sharedDir: String
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        sharedModel= ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
+        setContentView(R.layout.activity_shudip)
+        // Function to check and request permission.
         checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_PERMISSION_CODE)
+        val bundle = intent.extras
+        sharedDir = bundle!!.getString("pairingDir").toString()
+        sharedKeys = bundle.getByteArray("keys")!!
 
+        //Switch to connection activity
+        switchConActButton = findViewById(R.id.switch_connection_activity)
+        switchConActButton.isEnabled = false
+        switchConActButton.setOnClickListener {
+            switchConAct()
+        }
 
+        //Switch to image activity
+        switchImgActButton = findViewById(R.id.switch_image_activity)
+        switchImgActButton.setOnClickListener {
+            checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE, READ_PERMISSION_CODE)
+        }
+        Log.i("Shudip", "11111111111111111222222222222333333333333"+ sharedDir)
+        //Switch Connection on and off
+        val connectionOnOffSwitch: Switch = findViewById(R.id.connection_on_off)
+        connectionOnOffSwitch.setOnCheckedChangeListener { _,
+                isChecked -> switchConService(isChecked)
+        }
     }
 
     /** Defines callbacks for service binding, passed to bindService()  */
-    private val connectionS = object : ServiceConnection {
+    private val connection = object : ServiceConnection {
 
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
@@ -63,16 +78,15 @@ class ConnectionFragment : Fragment() {
 
     /** Called when the user taps the "Connected Device" button  */
     private fun switchConAct() {
-        Log.i("connectionFragment","key byte array size: "+sharedModel.getKeys().size)
-        val con_act_intent = Intent(requireContext(), ConnectionActivity::class.java)
-        con_act_intent.putExtra("keys", sharedModel.getKeys());
-        con_act_intent.putExtra("pairingDir", sharedModel.getPairDir());
+        val con_act_intent = Intent(this, ConnectionActivity::class.java)
+        con_act_intent.putExtra("keys", sharedKeys);
+        con_act_intent.putExtra("pairingDir", sharedDir);
         startActivity(con_act_intent)
     }
 
     /** Called when the user taps the "Images" button  */
     private fun switchImgAct() {
-        val img_act_intent = Intent(requireContext(), ImageActivity::class.java)
+        val img_act_intent = Intent(this, ImageActivity::class.java)
         img_act_intent.putExtra("parent", "MainActivity")
         startActivity(img_act_intent)
     }
@@ -80,29 +94,30 @@ class ConnectionFragment : Fragment() {
     /** Called when the user taps the "Connection" switch  */
     private fun switchConService(isChecked: Boolean) {
         if (isChecked) {
-            Toast.makeText(requireContext(), "Nearby Devices Searching", Toast.LENGTH_SHORT).show()
+
+            Toast.makeText(this, "Nearby Devices Searching", Toast.LENGTH_SHORT).show()
             //conServiceIntent = Intent(this, ConnectionService::class.java)
             //startService(conServiceIntent)
-            Intent(requireContext(), ConnectionService::class.java).also { intent ->
-                intent.putExtra("keys", sharedModel.getKeys());
-                intent.putExtra("pairingDir", sharedModel.getPairDir());
-                requireActivity().bindService(intent, connectionS, Context.BIND_AUTO_CREATE)
+            Intent(this, ConnectionService::class.java).also { intent ->
+                intent.putExtra("keys", sharedKeys);
+                intent.putExtra("pairingDir", sharedDir);
+                bindService(intent, connection, Context.BIND_AUTO_CREATE)
             }
             switchConActButton.isEnabled = true
 
         } else {
-            Toast.makeText(requireContext(), "Closing Connection", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Closing Connection", Toast.LENGTH_SHORT).show()
             //stopService(conServiceIntent)
-            requireActivity().unbindService(connectionS)
+            unbindService(connection)
             switchConActButton.isEnabled = false
         }
     }
 
     /** Function to check and request permission.*/
     private fun checkPermission(permission: String, requestCode: Int) {
-        if (ContextCompat.checkSelfPermission(requireContext(),permission) == PackageManager.PERMISSION_DENIED) {
+        if (ContextCompat.checkSelfPermission(this,permission) == PackageManager.PERMISSION_DENIED) {
             // Requesting the permission
-            ActivityCompat.requestPermissions(requireActivity(), arrayOf(permission), requestCode)
+            ActivityCompat.requestPermissions(this, arrayOf(permission), requestCode)
         }
         else {
             if (requestCode == LOCATION_PERMISSION_CODE) {
@@ -126,43 +141,15 @@ class ConnectionFragment : Fragment() {
             }
         } else if (requestCode == READ_PERMISSION_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(requireContext(),"Read Storage Permission Granted", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,"Read Storage Permission Granted",Toast.LENGTH_SHORT).show()
                 switchImgAct()
             } else {
-                Toast.makeText(requireContext(),"Read Storage Permission Denied", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,"Read Storage Permission Denied",Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        binding = FragmentConnectionBinding.inflate(inflater)
-
-
-        //Switch to connection activity
-        switchConActButton = binding.switchConnectionActivity
-        switchConActButton.isEnabled = false
-        switchConActButton.setOnClickListener {
-            switchConAct()
-        }
-
-        //Switch to image activity
-        switchImgActButton = binding.switchImageActivity
-        switchImgActButton.setOnClickListener {
-            checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE, READ_PERMISSION_CODE)
-        }
-
-        //Switch Connection on and off
-        val connectionOnOffSwitch: Switch =binding.connectionOnOff
-        connectionOnOffSwitch.setOnCheckedChangeListener { _,
-                                                           isChecked -> switchConService(isChecked)
-        }
-
-
-        return binding.root
+    override fun onDestroy() {
+        super.onDestroy()
     }
-
-
 }

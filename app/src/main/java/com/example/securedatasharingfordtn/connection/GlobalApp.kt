@@ -1,5 +1,4 @@
 package com.example.securedatasharingfordtn.connection
-
 import android.app.Application
 import android.provider.Settings
 import android.util.Log

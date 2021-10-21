@@ -1,5 +1,4 @@
 package com.example.securedatasharingfordtn.connection
-
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -10,17 +9,11 @@ import android.util.Log
 import android.widget.Toast
 import androidx.collection.SimpleArrayMap
 import androidx.core.net.toUri
-import com.example.securedatasharingfordtn.revoabe.Ciphertext
-import com.example.securedatasharingfordtn.revoabe.PrivateKey
-import com.example.securedatasharingfordtn.revoabe.PublicKey
 import com.google.android.gms.common.util.IOUtils.copyStream
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.*
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
-import it.unisa.dia.gas.jpbc.Pairing
-import it.unisa.dia.gas.plaf.jpbc.pairing.PairingFactory
-import it.unisa.dia.gas.plaf.jpbc.util.Arrays
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -29,10 +22,17 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
 import android.content.Intent.getIntent
-
 import android.os.Bundle
+import androidx.lifecycle.ViewModelProvider
+import com.example.securedatasharingfordtn.Preferences
+import com.example.securedatasharingfordtn.SharedViewModel
+import com.example.securedatasharingfordtn.revoabe.Ciphertext
+import com.example.securedatasharingfordtn.revoabe.PrivateKey
+import com.example.securedatasharingfordtn.revoabe.PublicKey
 import com.example.securedatasharingfordtn.revoabe.ReVo_ABE
-
+import it.unisa.dia.gas.jpbc.Pairing
+import it.unisa.dia.gas.plaf.jpbc.pairing.PairingFactory
+import it.unisa.dia.gas.plaf.jpbc.util.Arrays
 
 /***check service condition on force stop***/
 
@@ -43,7 +43,6 @@ class ConnectionService : Service() {
     lateinit var DEVICE_ID: String
     private val STRATEGY: Strategy = Strategy.P2P_CLUSTER
     private val context: Context = this
-
     var endpointIDConnected: ArrayList<String> = ArrayList()
     var endpointNameConnected: ArrayList<String> = ArrayList()
     var endpointIDNameMap: HashMap<String, String> = HashMap()
@@ -53,16 +52,16 @@ class ConnectionService : Service() {
     private var serviceCallbacks: ServiceCallbacks? = null
 
     var textMsg: String? = null
-    var encrypteFilename: Ciphertext? = null
+    var encryptedFilename: Ciphertext? = null
     var imageMsg: File? = null
     var rcvdFilename: String? = null
     private val incomingFilePayloads = SimpleArrayMap<Long, Payload>()
     private val completedFilePayloads = SimpleArrayMap<Long, Payload>()
     private val filePayloadFilenames = SimpleArrayMap<Long, String>()
+
     lateinit var privateKey: PrivateKey
     lateinit var publicKey: PublicKey
     lateinit var pairing: Pairing
-
 
     interface ServiceCallbacks {
         fun refreshConnectionList(endpointNameConnected: ArrayList<String>)
@@ -84,11 +83,10 @@ class ConnectionService : Service() {
         val pairingDir = bundle.getString("pairingDir")
         if (keys !=null && pairingDir != null)
             bootstrap(pairingDir,keys)
-
         return conServiceBinder
     }
     private fun bootstrap(dirForPairingFile : String, keys: ByteArray){
-
+        Log.i("ConnectionService", dirForPairingFile)
         this.pairing = PairingFactory.getPairing(dirForPairingFile)
         val publickeySize = ByteBuffer.wrap(keys,0,4).order(ByteOrder.nativeOrder()).getInt()
         val privatekeySize = ByteBuffer.wrap(keys,publickeySize+4,4).order(ByteOrder.nativeOrder()).getInt()
@@ -234,20 +232,31 @@ class ConnectionService : Service() {
 //        val payload = Payload.fromBytes(bytes)
 //        Nearby.getConnectionsClient(applicationContext).sendPayload(endpointId, payload)
 //    }
-    fun ByteArray.toHex(): String = joinToString(separator = "") { eachByte -> "%02x".format(eachByte) }
 
     private fun sendPayload(endpointId: String) {
         if (textMsg != null) {
-
-            val filenamePayload = Payload.fromBytes(encrypteFilename!!.toByteArray())
-
-            Log.i("Cipher",encrypteFilename!!.toByteArray().toHex() )
+            val filenamePayload = Payload.fromBytes(encryptedFilename!!.toByteArray())
             Nearby.getConnectionsClient(context).sendPayload(endpointId, filenamePayload)
             textMsg = null
         }
         if (imageMsg != null) {
             val pfd = contentResolver.openFileDescriptor(imageMsg!!.toUri(), "r")
             val filePayload = Payload.fromFile(pfd!!)
+
+            /*
+            val preferences = Preferences(this)
+            val RLStringList = preferences.getRevokedMembers().toList()
+            var RL = listOf<Int>()
+            for(RLStr in RLStringList){
+                RL+= RLStr.toInt()+1
+            }
+            this.publicKey.printPublicKey()
+            var policyText : EditText  =findViewById(R.id.editTextPolicy)
+
+            ReVo_ABE.encrypt(this.pairing
+                ,this.publicKey,filePayload.asBytes(),policyText.text.toString(), RL)
+
+             */
             Nearby.getConnectionsClient(applicationContext).sendPayload(endpointId, filePayload)
             imageMsg = null
         }
@@ -259,9 +268,9 @@ class ConnectionService : Service() {
             Log.d(TAG, "Payload Received")
             when (payload.type) {
                 Payload.Type.BYTES -> {
-                    Log.i("Cipher",Ciphertext(payload.asBytes()!!,pairing).toByteArray().toHex() )
-                    publicKey.printPublicKey()
-                    rcvdFilename = String(ReVo_ABE.decrypt(pairing,publicKey,Ciphertext(payload.asBytes()!!,pairing),privateKey) )
+                    //rcvdFilename = String(payload.asBytes()!!, StandardCharsets.UTF_8)
+                    rcvdFilename = String(ReVo_ABE.decrypt(pairing,publicKey,
+                        Ciphertext(payload.asBytes()!!,pairing),privateKey) )
                 }
                 Payload.Type.FILE -> {
                     // Add this to our tracking map, so that we can retrieve the payload later.

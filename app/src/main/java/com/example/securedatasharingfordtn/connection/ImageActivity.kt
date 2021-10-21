@@ -1,7 +1,5 @@
 package com.example.securedatasharingfordtn.connection
-
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -20,8 +18,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.example.securedatasharingfordtn.R
-import com.example.securedatasharingfordtn.connection.BitmapScaler
-import com.example.securedatasharingfordtn.connection.SelectedImageActivity
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -63,7 +59,6 @@ class ImageActivity : AppCompatActivity() {
 
     /*Capture Photo and Store part*/
 
-    @SuppressLint("HardwareIds")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_image)
@@ -185,7 +180,7 @@ class ImageActivity : AppCompatActivity() {
         photoFile = getPhotoFileUri(Companion.photoName, OWN_IMAGE_FOLDER)
 
         // wrap File object into a content provider //required for API >= 24
-        val fileProvider: Uri = FileProvider.getUriForFile(this, "com.example.securedatasharingfordtn.fileprovider", photoFile)
+        val fileProvider: Uri = FileProvider.getUriForFile(this, "com.example.basicconnection.fileprovider", photoFile)
         intent.putExtra(MediaStore.EXTRA_OUTPUT, fileProvider)
 
         if (intent.resolveActivity(packageManager) != null) {
@@ -295,7 +290,20 @@ class ImageActivity : AppCompatActivity() {
         val imgs = getDirectoryFileUri(folder)
         for (img in imgs) {
             val bitmap = BitmapFactory.decodeFile(img.path)
-            if(!img.name.equals(photoName)) { //don't want to show default photo when taking
+            if(img.name.equals("AES found verification not match, wrong keys")){
+                val tmp = BitmapFactory.decodeResource(resources, R.drawable.invalid_perm)
+                imageGridItems.add(ImageGridItem(tmp!!, img.name))
+            }
+            else if(img.name.equals("Policy not satisfied.")){
+                val tmp = BitmapFactory.decodeResource(resources, R.drawable.invalid_attr)
+                imageGridItems.add(ImageGridItem(tmp!!, img.name))
+            }
+            else if(img.name.equals("This user is in the revocation list.")) {
+                val tmp = BitmapFactory.decodeResource(resources, R.drawable.revoked)
+                imageGridItems.add(ImageGridItem(tmp!!, img.name))
+            }
+            else if(!img.name.equals(photoName)) { //don't want to show default photo when taking
+
                 val rotatedImage = getRotatedImage(bitmap, img.path)
                 imageGridItems.add(ImageGridItem(rotatedImage!!, img.name))
             }
